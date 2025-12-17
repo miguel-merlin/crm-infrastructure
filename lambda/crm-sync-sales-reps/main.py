@@ -3,12 +3,40 @@ import tempfile
 import os
 from mypy_boto3_dynamodb.service_resource import DynamoDBServiceResource, Table
 from mypy_boto3_s3 import S3Client
-from typing import List, Dict, Any
-from utils import read_sales_reps_from_csv, safe_get_env
+from typing import List, Dict, Any, Tuple
+from utils import read_sales_reps_from_csv, safe_get_env, write_sales_reps_to_dynamo
 from model import SalesRep
 
 
 TABLE_NAME = "TABLE_NAME"
+
+
+def parse_s3_event(event: Dict[str, Any]) -> Tuple[str, str]:
+    """
+    Parses the S3 event to extract the bucket name and object key.
+    """
+    try:
+        record = event["Records"][0]
+        bucket_name = record["s3"]["bucket"]["name"]
+        object_key = record["s3"]["object"]["key"]
+        return bucket_name, object_key
+    except (KeyError, IndexError) as e:
+        raise ValueError(f"Error parsing event: {e}")
+
+
+def download_file_from_s3(
+    s3_client: S3Client, bucket_name: str, object_key: str
+) -> str:
+    """
+    Downloads a file from S3 to a temporary file and returns the path.
+    """
+    with tempfile.NamedTemporaryFile(mode="wb", delete=False, suffix=".csv") as temp_file:
+        temp_file_path = temp_file.name
+        s3_client.download_fileobj(bucket_name, object_key, temp_file)
+        print(
+            f"Downloaded S3 object s3://{bucket_name}/{object_key} to {temp_file_path}"
+        )
+        return temp_file_path
 
 
 def handler(event, context) -> Dict[str, Any]:
@@ -21,23 +49,14 @@ def handler(event, context) -> Dict[str, Any]:
     table: Table = dynamo_db.Table(table_name)
 
     try:
-        record = event["Records"][0]
-        bucket_name = record["s3"]["bucket"]["name"]
-        object_key = record["s3"]["object"]["key"]
-    except (KeyError, IndexError) as e:
-        print(f"Error parsing event: {e}")
+        bucket_name, object_key = parse_s3_event(event)
+    except ValueError as e:
+        print(str(e))
         return {"statusCode": 400, "body": {"error": "Invalid event structure"}}
 
     temp_file_path = None
     try:
-        with tempfile.NamedTemporaryFile(
-            mode="wb", delete=False, suffix=".csv"
-        ) as temp_file:
-            temp_file_path = temp_file.name
-            s3_client.download_fileobj(bucket_name, object_key, temp_file)
-            print(
-                f"Downloaded S3 object s3://{bucket_name}/{object_key} to {temp_file_path}"
-            )
+        temp_file_path = download_file_from_s3(s3_client, bucket_name, object_key)
         sales_reps: List[SalesRep] = read_sales_reps_from_csv(temp_file_path)
         print(f"Read {len(sales_reps)} sales reps from CSV")
     except Exception as e:
@@ -46,17 +65,10 @@ def handler(event, context) -> Dict[str, Any]:
             os.unlink(temp_file_path)
         return {"statusCode": 500, "body": {"error": str(e)}}
 
-    success_count = 0
-    error_count = 0
     try:
-        with table.batch_writer() as batch:
-            for sales_rep in sales_reps:
-                try:
-                    batch.put_item(Item=sales_rep.to_dynamo_item())
-                    success_count += 1
-                except Exception as e:
-                    print(f"Error inserting sales rep {sales_rep.id}: {e}")
-                    error_count += 1
+        result = write_sales_reps_to_dynamo(table, sales_reps)
+        success_count = result["successful_inserts"]
+        error_count = result["failed_inserts"]
     except Exception as e:
         print(f"Error during batch write: {e}")
         return {"statusCode": 500, "body": {"error": str(e)}}

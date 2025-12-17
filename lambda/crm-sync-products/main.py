@@ -5,7 +5,3 @@ def handler(event, context):
     print(f"Read {len(products)} products from CSV")
     for product in products:
         print(product)
-
-
-if __name__ == "__main__":
-    handler({}, {})
