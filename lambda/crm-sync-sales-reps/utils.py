@@ -2,6 +2,7 @@ import os
 import csv
 from typing import List, Dict, Any
 from model import SalesRep
+from mypy_boto3_dynamodb.service_resource import Table
 
 
 def safe_get_env(var_name: str) -> str:
@@ -37,7 +38,9 @@ def read_sales_reps_from_csv(file_path: str) -> List[SalesRep]:
     return sales_reps
 
 
-def write_sales_reps_to_dynamo(table: Any, sales_reps: List[SalesRep]) -> Dict[str, int]:
+def write_sales_reps_to_dynamo(
+    table: Table, sales_reps: List[SalesRep]
+) -> Dict[str, int]:
     success_count = 0
     error_count = 0
     with table.batch_writer() as batch:
@@ -48,7 +51,7 @@ def write_sales_reps_to_dynamo(table: Any, sales_reps: List[SalesRep]) -> Dict[s
             except Exception as e:
                 print(f"Error inserting sales rep {sales_rep.id}: {e}")
                 error_count += 1
-    
+
     return {
         "successful_inserts": success_count,
         "failed_inserts": error_count,
