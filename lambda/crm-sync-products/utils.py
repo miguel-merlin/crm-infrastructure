@@ -1,8 +1,11 @@
 import os
 import csv
+import logging
 from typing import List
 from model import Product, DBWriteResult
 from mypy_boto3_dynamodb.service_resource import Table
+
+logger = logging.getLogger(__name__)
 
 
 def safe_get_env(var_name: str) -> str:
@@ -61,6 +64,6 @@ def write_products_to_dynamo(products: List[Product], table: Table) -> DBWriteRe
                 batch.put_item(Item=product.to_dynamo_item())
                 success_count += 1
             except Exception as e:
-                print(f"Error writing product {product.id} to DynamoDB: {e}")
+                logger.error(f"Error writing product {product.id} to DynamoDB: {e}")
                 error_count += 1
     return DBWriteResult(successful_inserts=success_count, failed_inserts=error_count)
