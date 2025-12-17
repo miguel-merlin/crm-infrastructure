@@ -1,7 +1,7 @@
 import unittest
 import os
-from src.utils import read_products_from_csv
-from src.model import Product
+from utils import read_products_from_csv
+from model import Product
 
 
 class TestUtils(unittest.TestCase):
