@@ -13,3 +13,9 @@ class SalesRep:
             "name": self.name,
             "email": self.email,
         }
+
+
+@dataclass
+class DBWriteResult:
+    successful_inserts: int = 0
+    failed_inserts: int = 0

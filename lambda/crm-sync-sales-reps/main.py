@@ -30,7 +30,9 @@ def download_file_from_s3(
     """
     Downloads a file from S3 to a temporary file and returns the path.
     """
-    with tempfile.NamedTemporaryFile(mode="wb", delete=False, suffix=".csv") as temp_file:
+    with tempfile.NamedTemporaryFile(
+        mode="wb", delete=False, suffix=".csv"
+    ) as temp_file:
         temp_file_path = temp_file.name
         s3_client.download_fileobj(bucket_name, object_key, temp_file)
         print(
@@ -66,9 +68,7 @@ def handler(event, context) -> Dict[str, Any]:
         return {"statusCode": 500, "body": {"error": str(e)}}
 
     try:
-        result = write_sales_reps_to_dynamo(table, sales_reps)
-        success_count = result["successful_inserts"]
-        error_count = result["failed_inserts"]
+        write_result = write_sales_reps_to_dynamo(table, sales_reps)
     except Exception as e:
         print(f"Error during batch write: {e}")
         return {"statusCode": 500, "body": {"error": str(e)}}
@@ -77,12 +77,14 @@ def handler(event, context) -> Dict[str, Any]:
             os.unlink(temp_file_path)
             print(f"Cleaned up temporary file {temp_file_path}")
 
-    print(f"\nSummary: {success_count} successful, {error_count} errors")
+    print(
+        f"\nSummary: {write_result.successful_inserts} successful, {write_result.failed_inserts} errors"
+    )
     return {
         "statusCode": 200,
         "body": {
             "total": len(sales_reps),
-            "successful_inserts": success_count,
-            "failed_inserts": error_count,
+            "successful_inserts": write_result.successful_inserts,
+            "failed_inserts": write_result.failed_inserts,
         },
     }
