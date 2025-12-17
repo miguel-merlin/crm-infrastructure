@@ -1,7 +1,7 @@
 import unittest
 import os
-from src.model import SalesRep
-from src.utils import read_sales_reps_from_csv
+from utils import read_sales_reps_from_csv
+from model import SalesRep
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 

@@ -14,11 +14,6 @@ TABLE_NAME = "TABLE_NAME"
 def handler(event, context) -> Dict[str, Any]:
     """
     Lambda function handler to read sales reps from a CSV file and write them to a DynamoDB table.
-
-    :param event: Description
-    :param context: Description
-    :return: Description
-    :rtype: Dict[str, Any]
     """
     s3_client: S3Client = boto3.client("s3")
     dynamo_db: DynamoDBServiceResource = boto3.resource("dynamodb")
