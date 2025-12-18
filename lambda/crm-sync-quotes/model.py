@@ -8,6 +8,9 @@ class QuoteStatus(Enum):
     ORDERED = "Pedida"
     SENT = "Emitida"
 
+    def __str__(self) -> str:
+        return self.value
+
 
 @dataclass
 class Prospect:
@@ -39,10 +42,13 @@ class Quote:
             "created_at": self.created_at,
         }
 
+    def __str__(self) -> str:
+        return f"Quote(\nid={self.id}\n prospect={self.prospect}\n sales_rep_id={self.sales_rep_id}\n item_ids={self.item_ids}\n amount={self.amount}\n status={self.status}\n created_at={self.created_at}\n)"
+
 
 @dataclass
 class DBWriteResult:
-    successful_inserts: int = 0
-    failed_inserts: int = 0
-    failed_quote_ids: list[str] = []
-    errors: list[str] = []
+    successful_inserts: int
+    failed_inserts: int
+    failed_quote_ids: list[str]
+    errors: list[str]

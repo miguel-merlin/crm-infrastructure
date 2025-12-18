@@ -4,6 +4,7 @@ from model import Quote, DBWriteResult
 from mypy_boto3_dynamodb.service_resource import Table
 from botocore.exceptions import ClientError
 from typing import List
+import datetime
 
 
 logger = logging.getLogger(__name__)
@@ -46,7 +47,12 @@ def extract_email(email_str: str) -> str:
 
 
 def write_quotes_to_dynamodb(quotes: List[Quote], table: Table) -> DBWriteResult:
-    write_result = DBWriteResult()
+    write_result = DBWriteResult(
+        successful_inserts=0,
+        failed_inserts=0,
+        failed_quote_ids=[],
+        errors=[],
+    )
     for i in range(0, len(quotes), BATCH_SIZE):
         batch = quotes[i : i + BATCH_SIZE]
         try:
@@ -68,7 +74,12 @@ def write_quotes_to_dynamodb(quotes: List[Quote], table: Table) -> DBWriteResult
 
 
 def write_batch(quotes: List[Quote], table: Table) -> DBWriteResult:
-    result = DBWriteResult()
+    result = DBWriteResult(
+        successful_inserts=0,
+        failed_inserts=0,
+        failed_quote_ids=[],
+        errors=[],
+    )
     with table.batch_writer() as batch:
         for quote in quotes:
             try:

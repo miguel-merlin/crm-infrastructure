@@ -96,4 +96,7 @@ def handler(event, context):
 
 
 if __name__ == "__main__":
-    print(handler({}, {}))
+    quotes: List[Quote] = QuoteParser("./test/data/test.zip").read_quotes_from_zip()
+    print(f"Total quotes parsed: {len(quotes)}")
+    for i in range(5):
+        print(quotes[i])

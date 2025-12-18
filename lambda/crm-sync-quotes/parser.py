@@ -5,6 +5,7 @@ import logging
 import tempfile
 import zipfile
 from dbfread import DBF
+from datetime import timedelta, datetime
 
 logger = logging.getLogger(__name__)
 
@@ -38,17 +39,25 @@ class QuoteParser:
             if not cotizac_path or not cotizad_path:
                 logger.error("Required DBF files are missing in the ZIP archive.")
                 return []
-            cotizac_records = list(DBF(cotizac_path, encoding="latin1"))
-            cotizad_records = list(DBF(cotizad_path, encoding="latin1"))
+            cotizac_records = list(
+                DBF(cotizac_path, encoding="latin1", ignore_missing_memofile=True)
+            )
+            cotizad_records = list(
+                DBF(cotizad_path, encoding="latin1", ignore_missing_memofile=True)
+            )
 
             clientes_dict: Dict[str, Dict] = {}
             if clientes_path:
-                clientes_records = list(DBF(clientes_path, encoding="latin1"))
+                clientes_records = list(
+                    DBF(clientes_path, encoding="latin1", ignore_missing_memofile=True)
+                )
                 clientes_dict = {rec["CVE_CTE"]: rec for rec in clientes_records}
 
             prospects_dict: Dict[str, Dict] = {}
             if prospects_path:
-                prospects_records = list(DBF(prospects_path, encoding="latin1"))
+                prospects_records = list(
+                    DBF(prospects_path, encoding="latin1", ignore_missing_memofile=True)
+                )
                 prospects_dict = {rec["CVE_PROS"]: rec for rec in prospects_records}
             items_by_quote = self._group_items_by_quote(cotizad_records)
             for cotizac_rec in cotizac_records:
@@ -76,9 +85,10 @@ class QuoteParser:
             no_cot = rec.get("NO_COT")
             cve_prod = rec.get("CVE_PROD")
             if no_cot is not None and cve_prod:
+                quote_keys = str(int(no_cot)).strip()
                 if no_cot not in items_by_quote:
-                    items_by_quote[no_cot] = []
-                items_by_quote[no_cot].append(str(cve_prod).strip())
+                    items_by_quote[quote_keys] = []
+                items_by_quote[quote_keys].append(str(cve_prod).strip())
         return items_by_quote
 
     def _parse_prospect_from_prospect_dbf(
@@ -119,11 +129,12 @@ class QuoteParser:
         no_cot = str(cotizac_rec.get("NO_COT"))
         cve_cte = cotizac_rec.get("CVE_CTE")
         tipo_cte = cotizac_rec.get("TIPO_CTE", "").strip().upper()
-        cve_age = cotizac_rec.get("CVE_AGE", "").strip()
+        cve_age = str(cotizac_rec.get("CVE_AGE", "")).strip()
         total_cot = cotizac_rec.get("TOTAL_COT")
-        status_str = cotizac_rec.get("STATUS_COT", "").strip().upper()
-        f_alta_cot = cotizac_rec.get("F_ALTA_COT")
-
+        status_str = cotizac_rec.get("STATUS", "").strip().upper()
+        f_alta_cot = (cotizac_rec.get("F_ALTA_COT") or datetime.now()) - timedelta(
+            days=1
+        )
         prospect = None
         if tipo_cte == "P":
             prospect_rec = prospects_dict.get(cve_cte)
@@ -137,10 +148,9 @@ class QuoteParser:
         if not prospect:
             logger.debug(f"Skipping quote {no_cot}: No prospect information found")
             return None
-
         item_ids = items_by_quote.get(no_cot, [])
         status = self._map_status(status_str)
-        created_at = str(f_alta_cot).strip() if f_alta_cot else ""
+        created_at = f_alta_cot
         return Quote(
             id=no_cot,
             prospect=prospect,
@@ -148,5 +158,5 @@ class QuoteParser:
             item_ids=item_ids,
             amount=float(total_cot) if total_cot is not None else 0.0,
             status=status,
-            created_at=created_at,
+            created_at=str(created_at),
         )
