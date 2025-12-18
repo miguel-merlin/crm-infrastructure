@@ -16,26 +16,11 @@ class Prospect:
 
 
 @dataclass
-class SalesRep:
-    id: str
-    name: str
-    email: str
-
-
-@dataclass
-class Product:
-    id: str
-    description: str
-    quantity: int
-    price: float
-
-
-@dataclass
 class Quote:
     id: str
     prospect: Prospect
-    sales_rep: SalesRep
-    items: list[Product]
+    sales_rep_id: str
+    item_ids: list[str]
     amount: float
     status: QuoteStatus
     created_at: str
