@@ -6,7 +6,8 @@ from mypy_boto3_dynamodb.service_resource import DynamoDBServiceResource, Table
 import logging
 from typing import Any, Dict, Tuple, List
 from model import Quote
-from utils import safe_get_env, read_quotes_from_zip, write_quotes_to_dynamodb
+from parser import QuoteParser
+from utils import safe_get_env, write_quotes_to_dynamodb
 
 
 logger = logging.getLogger()
@@ -61,7 +62,8 @@ def handler(event, context):
     temp_file_path = None
     try:
         temp_file_path = download_file_from_s3(s3_client, bucket_name, object_key)
-        quotes: List[Quote] = read_quotes_from_zip(temp_file_path)
+        parser = QuoteParser(temp_file_path)
+        quotes: List[Quote] = parser.read_quotes_from_zip()
         logger.info(f"Read {len(quotes)} quotes from the file")
     except Exception as e:
         logger.error(f"Error processing file from S3: {str(e)}", exc_info=True)
