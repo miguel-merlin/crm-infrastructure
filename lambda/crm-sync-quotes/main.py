@@ -7,7 +7,6 @@ from typing import List
 from model import Quote
 from parser import QuoteParser
 from sender import QuoteEmailSender
-from datetime import datetime, timedelta
 from utils import (
     safe_get_env,
     write_quotes_to_dynamodb,
