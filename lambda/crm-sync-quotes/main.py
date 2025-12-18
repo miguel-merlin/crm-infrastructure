@@ -6,6 +6,8 @@ import logging
 from typing import List
 from model import Quote
 from parser import QuoteParser
+from sender import QuoteEmailSender
+from datetime import datetime, timedelta
 from utils import (
     safe_get_env,
     write_quotes_to_dynamodb,
@@ -19,6 +21,8 @@ logger.setLevel(logging.INFO)
 
 
 TABLE_NAME = "TABLE_NAME"
+SENDER = "SENDER_EMAIL"
+TEMPLATE_PATH = "assets/template.html"
 
 
 def handler(event, context):
@@ -58,6 +62,13 @@ def handler(event, context):
     logger.info(
         f"Processing complete: {write_result.successful_inserts} successful inserts, {write_result.failed_inserts} failed inserts"
     )
+    email_sender = QuoteEmailSender(
+        quotes=quotes,
+        email_cadence_config=set([3, 5, 7]),
+        template_path=TEMPLATE_PATH,
+        sender_email=SENDER,
+    )
+    email_sender.send_emails()
     return {
         "statusCode": 200,
         "body": {
