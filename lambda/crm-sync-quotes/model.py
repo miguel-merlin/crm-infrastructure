@@ -20,10 +20,18 @@ class Prospect:
 
 
 @dataclass
+class SalesRep:
+    id: str
+    name: str
+    email: str
+    phone_number: str
+
+
+@dataclass
 class Quote:
     id: str
     prospect: Prospect
-    sales_rep_id: str
+    sales_rep: SalesRep
     item_ids: list[str]
     amount: float
     status: QuoteStatus
@@ -35,7 +43,7 @@ class Quote:
             "prospect_id": self.prospect.id,
             "prospect_name": self.prospect.name,
             "prospect_email": self.prospect.email,
-            "sales_rep_id": self.sales_rep_id,
+            "sales_rep": self.sales_rep,
             "item_ids": self.item_ids,
             "amount": self.amount,
             "status": self.status.value,

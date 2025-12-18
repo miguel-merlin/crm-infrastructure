@@ -21,6 +21,7 @@ TABLE_NAME = "TABLE_NAME"
 SENDER = "SENDER_EMAIL"
 DOMANAIN = "DOMAIN"
 TEMPLATE_PATH = "assets/template.html"
+SALES_REPS_PATH = "assets/sales_rep.csv"
 
 
 def handler(event, context):
@@ -35,7 +36,7 @@ def handler(event, context):
     temp_file_path = None
     try:
         temp_file_path = download_file_from_s3(s3_client, bucket_name, object_key)
-        parser = QuoteParser(temp_file_path)
+        parser = QuoteParser(temp_file_path, SALES_REPS_PATH)
         quotes: List[Quote] = parser.read_quotes_from_zip()
         logger.info(f"Read {len(quotes)} quotes from the file")
     except Exception as e:

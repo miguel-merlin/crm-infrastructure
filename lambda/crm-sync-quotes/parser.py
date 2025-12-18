@@ -1,9 +1,11 @@
 from typing import List, Dict, Optional
-from model import Quote, Prospect, QuoteStatus
+from model import Quote, Prospect, QuoteStatus, SalesRep
 from utils import extract_email, find_file
 import logging
 import tempfile
 import zipfile
+import csv
+import os
 from dbfread import DBF
 from datetime import timedelta, datetime
 
@@ -13,6 +15,7 @@ COTIZAC_FILENAME = "cotizac.DBF"
 COTIZAD_FILENAME = "cotizad.DBF"
 CLIENTES_FILENAME = "clientes.DBF"
 PROSPECTS_FILENAME = "prospect.DBF"
+SALES_REP_FILENAME = "sales_rep.csv"
 
 STATUS_MAPPING = {
     "CANCELADA": QuoteStatus.CANCELLED,
@@ -22,14 +25,37 @@ STATUS_MAPPING = {
 
 
 class QuoteParser:
-    def __init__(self, file_path: str) -> None:
-        self.file_path = file_path
+    def __init__(self, zip_file_path: str, sales_reps_path: str) -> None:
+        self.zip_file_path = zip_file_path
+        self.sales_reps: Dict[str, SalesRep] = self._load_sales_reps(sales_reps_path)
+
+    def _load_sales_reps(self, sales_reps_path: str) -> Dict[str, SalesRep]:
+        sales_reps: Dict[str, SalesRep] = {}
+        assets_path = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)), sales_reps_path
+        )
+        if not os.path.exists(assets_path):
+            logger.warning("Sales rep CSV not found at %s", assets_path)
+            return sales_reps
+        with open(assets_path, newline="", encoding="utf-8") as csvfile:
+            reader = csv.DictReader(csvfile)
+            for row in reader:
+                rep_id = str(row.get("AGENTE", "")).strip()
+                if not rep_id:
+                    continue
+                sales_reps[rep_id] = SalesRep(
+                    id=rep_id,
+                    name=str(row.get("NOMBRE", "")).strip(),
+                    email=str(row.get("EMAIL", "")).strip(),
+                    phone_number=str(row.get("TEL", "")).strip(),
+                )
+        return sales_reps
 
     def read_quotes_from_zip(self) -> list[Quote]:
         """Read quotes from a ZIP file containing DBF files."""
         quotes: List[Quote] = []
         with tempfile.TemporaryDirectory() as temp_dir:
-            with zipfile.ZipFile(self.file_path, "r") as zip_ref:
+            with zipfile.ZipFile(self.zip_file_path, "r") as zip_ref:
                 zip_ref.extractall(temp_dir)
             cotizac_path = find_file(temp_dir, COTIZAC_FILENAME)
             cotizad_path = find_file(temp_dir, COTIZAD_FILENAME)
@@ -151,10 +177,14 @@ class QuoteParser:
         item_ids = items_by_quote.get(no_cot, [])
         status = self._map_status(status_str)
         created_at = f_alta_cot
+        sales_rep = self.sales_reps.get(cve_age)
+        if not sales_rep:
+            logger.debug("Sales rep %s not found in CSV; using empty details", cve_age)
+            sales_rep = SalesRep(id=cve_age, name="", email="", phone_number="")
         return Quote(
             id=no_cot,
             prospect=prospect,
-            sales_rep_id=cve_age,
+            sales_rep=sales_rep,
             item_ids=item_ids,
             amount=float(total_cot) if total_cot is not None else 0.0,
             status=status,
