@@ -93,10 +93,3 @@ def handler(event, context):
             "failed_inserts": write_result.failed_inserts,
         },
     }
-
-
-if __name__ == "__main__":
-    quotes: List[Quote] = QuoteParser("./test/data/test.zip").read_quotes_from_zip()
-    print(f"Total quotes parsed: {len(quotes)}")
-    for i in range(5):
-        print(quotes[i])
