@@ -1,9 +1,6 @@
 import os
 import logging
-from model import Quote, DBWriteResult
-from mypy_boto3_dynamodb.service_resource import Table
-from botocore.exceptions import ClientError
-from typing import List, Dict, Any, Tuple
+from typing import Dict, Any, Tuple
 import tempfile
 from mypy_boto3_s3 import S3Client
 

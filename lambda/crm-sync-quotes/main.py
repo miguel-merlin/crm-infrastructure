@@ -1,6 +1,7 @@
 import os
 import boto3
 from mypy_boto3_s3 import S3Client
+from mypy_boto3_dynamodb.service_resource import Table
 import logging
 from typing import List
 from model import Quote
@@ -16,7 +17,7 @@ from utils import (
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-
+TABLE_NAME = "TABLE_NAME"
 SENDER = "SENDER_EMAIL"
 TEMPLATE_PATH = "assets/template.html"
 
@@ -46,11 +47,14 @@ def handler(event, context):
     if temp_file_path and os.path.exists(temp_file_path):
         os.unlink(temp_file_path)
         logger.info(f"Deleted temporary file {temp_file_path}")
+    dynamodb = boto3.resource("dynamodb")
+    transactions_table: Table = dynamodb.Table(safe_get_env(TABLE_NAME))
     email_sender = QuoteEmailSender(
         quotes=quotes,
         email_cadence_config=set([3, 5, 7]),
         template_path=TEMPLATE_PATH,
         sender_email=safe_get_env(SENDER),
+        transactions_table=transactions_table,
     )
     email_sender.send_emails()
     return {"statusCode": 200, "body": "Processing completed successfully."}

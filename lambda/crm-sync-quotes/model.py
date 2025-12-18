@@ -42,13 +42,28 @@ class Quote:
             "created_at": self.created_at,
         }
 
+
+class EmailStatus(Enum):
+    NO_RESPONSE = "No Response"
+    SENT = "Sent"
+
     def __str__(self) -> str:
-        return f"Quote(\nid={self.id}\n prospect={self.prospect}\n sales_rep_id={self.sales_rep_id}\n item_ids={self.item_ids}\n amount={self.amount}\n status={self.status}\n created_at={self.created_at}\n)"
+        return self.value
 
 
 @dataclass
-class DBWriteResult:
-    successful_inserts: int
-    failed_inserts: int
-    failed_quote_ids: list[str]
-    errors: list[str]
+class EmailTransaction:
+    id: str
+    quote_id: str
+    email_address: str
+    sent_at: str
+    status: EmailStatus
+
+    def to_dynamodb_item(self) -> dict:
+        return {
+            "transaction_id": self.id,
+            "quote_id": self.quote_id,
+            "email_address": self.email_address,
+            "sent_at": self.sent_at,
+            "status": self.status.value,
+        }
