@@ -19,12 +19,14 @@ class QuoteEmailSender:
         template_path: str,
         sender_email: str,
         transactions_table: Table,
+        domain: str,
     ) -> None:
         self.quotes = quotes
         self.email_cadence_config = email_cadence_config
         self.ses_client = boto3.client("ses")
         self.sender_email = sender_email
         self.transactions_table = transactions_table
+        self.domain = domain
         try:
             with open(template_path, "r", encoding="utf-8") as f:
                 template_content = f.read()
@@ -51,6 +53,7 @@ class QuoteEmailSender:
             status=str(quote.status),
             created_at=quote.created_at,
             transaction_id=transaction_id,
+            domain=self.domain,
         )
 
     def _batch_write_transactions(self, transactions: List[EmailTransaction]) -> None:

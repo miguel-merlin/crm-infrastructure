@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,33 +14,39 @@
             padding: 0;
             background-color: #f9f9f9;
         }
+
         .container {
             max-width: 600px;
             margin: 20px auto;
             padding: 40px;
             background-color: #ffffff;
             border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
         }
+
         h1 {
             font-size: 20px;
             font-weight: 600;
             margin-bottom: 24px;
             color: #111;
         }
+
         p {
             margin-bottom: 16px;
             font-size: 16px;
         }
+
         .quote-info {
             border-left: 4px solid #e5e7eb;
             padding-left: 16px;
             margin: 24px 0;
             color: #666;
         }
+
         .actions {
             margin-top: 32px;
         }
+
         .btn {
             display: block;
             width: 100%;
@@ -52,21 +59,25 @@
             font-weight: 500;
             font-size: 16px;
         }
+
         .btn-buy {
             background-color: #000;
             color: #fff !important;
         }
+
         .btn-talk {
             background-color: #f3f4f6;
             color: #111 !important;
             border: 1px solid #d1d5db;
         }
+
         .btn-cancel {
             background-color: transparent;
             color: #9ca3af !important;
             font-size: 14px;
             text-decoration: underline;
         }
+
         .footer {
             margin-top: 48px;
             font-size: 12px;
@@ -75,11 +86,12 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <h1>Hola, {{ prospect_name }}</h1>
         <p>Te recordamos que tienes una cotización pendiente que aún no ha sido confirmada.</p>
-        
+
         <div class="quote-info">
             <p><strong>Referencia:</strong> {{ quote_id }}</p>
             <p><strong>Monto:</strong> ${{ amount }}</p>
@@ -89,9 +101,9 @@
         <p>¿Cómo deseas continuar?</p>
 
         <div class="actions">
-            <a href="#" class="btn btn-buy">Quiero Comprar</a>
-            <a href="#" class="btn btn-talk">Hablar con un Asesor</a>
-            <a href="#" class="btn btn-cancel">Ya NO estoy interesado</a>
+            <a href="{{ domain }}/buy/{{ transaction_id }}" class="btn btn-buy">Quiero Comprar</a>
+            <a href="{{ domain }}/talk/{{ transaction_id }}" class="btn btn-talk">Hablar con un Asesor</a>
+            <a href="{{ domain }}/cancel/{{ transaction_id }}" class="btn btn-cancel">Ya NO estoy interesado</a>
         </div>
 
         <div class="footer">
@@ -100,4 +112,5 @@
         </div>
     </div>
 </body>
+
 </html>

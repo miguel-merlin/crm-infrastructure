@@ -19,6 +19,7 @@ logger.setLevel(logging.INFO)
 
 TABLE_NAME = "TABLE_NAME"
 SENDER = "SENDER_EMAIL"
+DOMANAIN = "DOMAIN"
 TEMPLATE_PATH = "assets/template.html"
 
 
@@ -55,6 +56,7 @@ def handler(event, context):
         template_path=TEMPLATE_PATH,
         sender_email=safe_get_env(SENDER),
         transactions_table=transactions_table,
+        domain=safe_get_env(DOMANAIN),
     )
     email_sender.send_emails()
     return {"statusCode": 200, "body": "Processing completed successfully."}
