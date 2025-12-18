@@ -1,13 +1,17 @@
 import os
 import boto3
-import tempfile
 from mypy_boto3_s3 import S3Client
 from mypy_boto3_dynamodb.service_resource import DynamoDBServiceResource, Table
 import logging
-from typing import Any, Dict, Tuple, List
+from typing import List
 from model import Quote
 from parser import QuoteParser
-from utils import safe_get_env, write_quotes_to_dynamodb
+from utils import (
+    safe_get_env,
+    write_quotes_to_dynamodb,
+    parse_s3_event,
+    download_file_from_s3,
+)
 
 
 logger = logging.getLogger()
@@ -15,37 +19,6 @@ logger.setLevel(logging.INFO)
 
 
 TABLE_NAME = "TABLE_NAME"
-
-
-def parse_s3_event(event: Dict[str, Any]) -> Tuple[str, str]:
-    """
-    Parses the S3 event to extract the bucket name and object key.
-    """
-    try:
-        record = event["Records"][0]
-        bucket_name = record["s3"]["bucket"]["name"]
-        object_key = record["s3"]["object"]["key"]
-        logger.info(f"Parsed S3 event: bucket={bucket_name}, key={object_key}")
-        return bucket_name, object_key
-    except (KeyError, IndexError) as e:
-        logger.error(f"Error parsing S3 event: {e}", exc_info=True)
-        raise ValueError(f"Error parsing event: {e}")
-
-
-def download_file_from_s3(
-    s3_client: S3Client, bucket_name: str, object_key: str
-) -> str:
-    """
-    Downloads a file from S3 to a temporary file and returns the path.
-    """
-    with tempfile.NamedTemporaryFile(
-        mode="wb", delete=False, suffix=".csv"
-    ) as temp_file:
-        temp_file_path = temp_file.name
-        logger.info(f"Downloading s3://{bucket_name}/{object_key} to {temp_file_path}")
-        s3_client.download_fileobj(bucket_name, object_key, temp_file)
-        logger.info("Download complete")
-        return temp_file_path
 
 
 def handler(event, context):
