@@ -36,7 +36,7 @@ class QuoteParser:
             clientes_path = find_file(temp_dir, CLIENTES_FILENAME)
             prospects_path = find_file(temp_dir, PROSPECTS_FILENAME)
 
-            if not cotizac_path or not cotizad_path:
+            if not all([cotizac_path, cotizad_path, clientes_path, prospects_path]):
                 logger.error("Required DBF files are missing in the ZIP archive.")
                 return []
             cotizac_records = list(
