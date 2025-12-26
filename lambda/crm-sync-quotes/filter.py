@@ -24,6 +24,7 @@ class QuoteFilter:
             with open(allow_list_path, "r", encoding="utf-8") as f:
                 data = yaml.safe_load(f)
                 allowed_ids = set(data.get("ids", []))
+                logger.info(f"Parsed allowlist with {len(allowed_ids)} IDs")
                 return allowed_ids
         except Exception as e:
             logger.error(f"Error reading allowlist file: {e}", exc_info=True)
@@ -35,6 +36,9 @@ class QuoteFilter:
         now = datetime.now()
         for quote in self.quotes:
             days_since_creation = (now - datetime.fromisoformat(quote.created_at)).days
-            if days_since_creation in self.email_cadence_config:
+            if (
+                days_since_creation in self.email_cadence_config
+                and quote.id in self.allow_list_set
+            ):
                 filtered_quotes.append(quote)
         return filtered_quotes
