@@ -17,13 +17,13 @@ class QuoteFilter:
         self.email_cadence_config = email_cadence_config
         self.allow_list_set = self._parse_allowlist(allowlist_path)
 
-    def _parse_allowlist(self, allow_list_path: str) -> Set[int]:
+    def _parse_allowlist(self, allow_list_path: str) -> Set[str]:
         """Parse the allowlist file to get a set of allowed quote IDs."""
 
         try:
             with open(allow_list_path, "r", encoding="utf-8") as f:
                 data = yaml.safe_load(f)
-                allowed_ids = set(data.get("ids", []))
+                allowed_ids = set(map(str, data.get("ids", [])))
                 logger.info(f"Parsed allowlist with {len(allowed_ids)} IDs")
                 return allowed_ids
         except Exception as e:
