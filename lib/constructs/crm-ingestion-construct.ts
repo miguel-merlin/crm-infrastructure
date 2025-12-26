@@ -6,9 +6,15 @@ import * as s3n from "aws-cdk-lib/aws-s3-notifications";
 import { Construct } from "constructs";
 
 interface CrmIngestionProps {
+  tableName: string;
   partitionKeyName: string;
   codePath: string;
-  tableNameEnvName: string;
+  lambdaEnvVars?: { [key: string]: string };
+  globalSecondaryIndexes?: {
+    indexName: string;
+    partitionKeyName: string;
+    sortKeyName?: string;
+  }[];
 }
 
 export default class CrmIngestion extends Construct {
@@ -21,19 +27,40 @@ export default class CrmIngestion extends Construct {
     });
 
     const table = new dynamodb.Table(this, "Table", {
+      tableName: props.tableName,
       partitionKey: {
         name: props.partitionKeyName,
         type: dynamodb.AttributeType.STRING,
       },
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
 
+    if (props.globalSecondaryIndexes) {
+      props.globalSecondaryIndexes.forEach((gsi) => {
+        table.addGlobalSecondaryIndex({
+          indexName: gsi.indexName,
+          partitionKey: {
+            name: gsi.partitionKeyName,
+            type: dynamodb.AttributeType.STRING,
+          },
+          sortKey: gsi.sortKeyName
+            ? {
+                name: gsi.sortKeyName,
+                type: dynamodb.AttributeType.STRING,
+              }
+            : undefined,
+        });
+      });
+    }
+
     const processor = new lambda.Function(this, "Processor", {
-      runtime: lambda.Runtime.NODEJS_14_X,
-      handler: "index.handler",
+      runtime: lambda.Runtime.PYTHON_3_13,
+      handler: "main.handler",
       code: lambda.Code.fromAsset(props.codePath),
       environment: {
-        [props.tableNameEnvName]: table.tableName,
+        TABLE_NAME: table.tableName,
+        ...props.lambdaEnvVars,
       },
     });
 

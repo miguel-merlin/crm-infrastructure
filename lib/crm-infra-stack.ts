@@ -1,27 +1,33 @@
 import * as cdk from "aws-cdk-lib";
-import CrmIngestion from "./crm-ingestion-construct";
+import CrmIngestion from "./constructs/crm-ingestion-construct";
+import ApiResponse from "./constructs/crm-api-response-construct";
 import { Construct } from "constructs";
 
+const DOMAIN = "hidrorey.info";
 export class CrmInfraStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
     new CrmIngestion(this, "QuotesIngestion", {
-      partitionKeyName: "quoteId",
-      codePath: "lambda/quotes-processor",
-      tableNameEnvName: "QUOTES_TABLE_NAME",
+      tableName: "crm-quotes-emails-transactions",
+      partitionKeyName: "transaction_id",
+      codePath: "./lambda/crm-sync-quotes",
+      lambdaEnvVars: {
+        SENDER_EMAIL: "contacto@" + DOMAIN,
+        DOMAIN: DOMAIN,
+      },
+      globalSecondaryIndexes: [
+        {
+          indexName: "by_quote_id",
+          partitionKeyName: "quote_id",
+        },
+      ],
     });
 
-    new CrmIngestion(this, "ProductsIngestion", {
-      partitionKeyName: "productId",
-      codePath: "lambda/products-processor",
-      tableNameEnvName: "PRODUCTS_TABLE_NAME",
-    });
-
-    new CrmIngestion(this, "SalesRepsIngestion", {
-      partitionKeyName: "salesRepId",
-      codePath: "lambda/sales-reps-processor",
-      tableNameEnvName: "SALES_REP_TABLE_NAME",
+    new ApiResponse(this, "ApiResponse", {
+      tableName: "crm-api-responses",
+      lambdaCodePath: "./lambda/crm-web-response",
+      enableCors: true,
     });
   }
 }
