@@ -3,6 +3,7 @@ import * as s3 from "aws-cdk-lib/aws-s3";
 import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as s3n from "aws-cdk-lib/aws-s3-notifications";
+import * as iam from "aws-cdk-lib/aws-iam";
 import { Construct } from "constructs";
 
 interface CrmIngestionProps {
@@ -18,15 +19,20 @@ interface CrmIngestionProps {
 }
 
 export default class CrmIngestion extends Construct {
+  public readonly bucket: s3.Bucket;
+  public readonly table: dynamodb.Table;
+  public readonly processor: lambda.Function;
+  public readonly uploadRole: iam.Role;
+
   constructor(scope: Construct, id: string, props: CrmIngestionProps) {
     super(scope, id);
 
-    const bucket = new s3.Bucket(this, "Bucket", {
+    this.bucket = new s3.Bucket(this, "Bucket", {
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       autoDeleteObjects: true,
     });
 
-    const table = new dynamodb.Table(this, "Table", {
+    this.table = new dynamodb.Table(this, "Table", {
       tableName: props.tableName,
       partitionKey: {
         name: props.partitionKeyName,
@@ -38,7 +44,7 @@ export default class CrmIngestion extends Construct {
 
     if (props.globalSecondaryIndexes) {
       props.globalSecondaryIndexes.forEach((gsi) => {
-        table.addGlobalSecondaryIndex({
+        this.table.addGlobalSecondaryIndex({
           indexName: gsi.indexName,
           partitionKey: {
             name: gsi.partitionKeyName,
@@ -54,21 +60,33 @@ export default class CrmIngestion extends Construct {
       });
     }
 
-    const processor = new lambda.Function(this, "Processor", {
+    this.processor = new lambda.Function(this, "Processor", {
       runtime: lambda.Runtime.PYTHON_3_13,
       handler: "main.handler",
-      code: lambda.Code.fromAsset(props.codePath),
+      code: lambda.Code.fromAsset(props.codePath, {
+        bundling: {
+          image: lambda.Runtime.PYTHON_3_10.bundlingImage,
+          command: [
+            "bash",
+            "-c",
+            "pip install -r requirements.txt --platform manylinux2014_x86_64 --only-binary=:all: -t /asset-output && cp -au . /asset-output",
+          ],
+        },
+      }),
+      timeout: cdk.Duration.minutes(5),
+      memorySize: 1024,
+      description: "Processes CRM ingestion files from S3 to DynamoDB",
       environment: {
-        TABLE_NAME: table.tableName,
+        TABLE_NAME: this.table.tableName,
         ...props.lambdaEnvVars,
       },
     });
 
-    table.grantReadWriteData(processor);
+    this.table.grantReadWriteData(this.processor);
 
-    bucket.addEventNotification(
+    this.bucket.addEventNotification(
       s3.EventType.OBJECT_CREATED,
-      new s3n.LambdaDestination(processor)
+      new s3n.LambdaDestination(this.processor)
     );
   }
 }
