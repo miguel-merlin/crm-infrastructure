@@ -15,14 +15,12 @@ class QuoteEmailSender:
     def __init__(
         self,
         quotes: List[Quote],
-        email_cadence_config: Set[int],
         template_path: str,
         sender_email: str,
         transactions_table: Table,
         domain: str,
     ) -> None:
         self.quotes = quotes
-        self.email_cadence_config = email_cadence_config
         self.ses_client = boto3.client("ses")
         self.sender_email = sender_email
         self.transactions_table = transactions_table
@@ -33,16 +31,6 @@ class QuoteEmailSender:
             self.template: Template = Template(template_content)
         except Exception as e:
             raise ValueError(f"Error reading email template: {str(e)}") from e
-
-    def _filter_quotes(self) -> Dict[int, Quote]:
-        """Filter quotes based on the email cadence configuration."""
-        filtered_quotes = {}
-        now = datetime.now()
-        for quote in self.quotes:
-            days_since_creation = (now - datetime.fromisoformat(quote.created_at)).days
-            if days_since_creation in self.email_cadence_config:
-                filtered_quotes[days_since_creation] = quote
-        return filtered_quotes
 
     def _render_template(self, quote: Quote, transaction_id: str) -> str:
         """Render the email template with quote data."""
@@ -64,9 +52,8 @@ class QuoteEmailSender:
 
     def send_emails(self) -> None:
         """Send emails for the filtered quotes."""
-        filtered_quotes: Dict[int, Quote] = self._filter_quotes()
         email_transactions: List[EmailTransaction] = []
-        for quote in filtered_quotes.values():
+        for quote in self.quotes:
             transaction_id = str(uuid.uuid4())
             rendered_email = self._render_template(quote, transaction_id)
             body_text = "Los detalles de tu cotización están adjuntos."
