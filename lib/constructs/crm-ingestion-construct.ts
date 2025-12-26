@@ -83,6 +83,7 @@ export default class CrmIngestion extends Construct {
     });
 
     this.table.grantReadWriteData(this.processor);
+    this.bucket.grantRead(this.processor);
 
     this.bucket.addEventNotification(
       s3.EventType.OBJECT_CREATED,
