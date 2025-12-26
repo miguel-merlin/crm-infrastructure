@@ -24,6 +24,7 @@ DOMANAIN = "DOMAIN"
 TEMPLATE_PATH = "assets/template.html"
 SALES_REPS_PATH = "assets/sales_rep.csv"
 EMAIL_CADENCE_DAYS = set([3, 5, 7])
+ALLOW_LIST_PATH = "assets/allowlist.yaml"
 
 
 def handler(event, context):
@@ -53,7 +54,7 @@ def handler(event, context):
         logger.info(f"Deleted temporary file {temp_file_path}")
     dynamodb = boto3.resource("dynamodb")
     transactions_table: Table = dynamodb.Table(safe_get_env(TABLE_NAME))
-    quote_filter = QuoteFilter(quotes, EMAIL_CADENCE_DAYS)
+    quote_filter = QuoteFilter(quotes, EMAIL_CADENCE_DAYS, ALLOW_LIST_PATH)
     filtered_quotes = quote_filter.filter_quotes()
     email_sender = QuoteEmailSender(
         quotes=filtered_quotes,
@@ -64,12 +65,3 @@ def handler(event, context):
     )
     email_sender.send_emails()
     return {"statusCode": 200, "body": "Processing completed successfully."}
-
-
-if __name__ == "__main__":
-    qp = QuoteParser("test/data/test.zip", SALES_REPS_PATH)
-    quotes = qp.read_quotes_from_zip()
-    print(f"Total quotes parsed: {len(quotes)}")
-    qf = QuoteFilter(quotes, EMAIL_CADENCE_DAYS)
-    filtered = qf.filter_quotes()
-    print(f"Total quotes after filtering: {len(filtered)}")
