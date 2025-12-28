@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recordatorio de Cotización | Hidrorey</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --ink: #0b1f2a;
+            --deep: #0f3c4c;
+            --mist: #e8f2f4;
+            --sea: #2da7a1;
+            --sun: #f2c14e;
+            --paper: #ffffff;
+            --shadow: 0 30px 60px rgba(10, 27, 34, 0.18);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Plus Jakarta Sans", "Segoe UI", sans-serif;
+            color: var(--ink);
+            background:
+                radial-gradient(circle at 10% 20%, rgba(45, 167, 161, 0.18), transparent 48%),
+                radial-gradient(circle at 90% 10%, rgba(242, 193, 78, 0.2), transparent 45%),
+                linear-gradient(120deg, #f9fbfc 0%, #eef6f7 60%, #e7f1f2 100%);
+            min-height: 100vh;
+        }
+
+        .page {
+            max-width: 1120px;
+            margin: 0 auto;
+            padding: 36px 24px 72px;
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24px;
+            margin-bottom: 48px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 700;
+            letter-spacing: 0.6px;
+            text-transform: uppercase;
+        }
+
+        .brand-mark {
+            width: 44px;
+            height: 44px;
+            border-radius: 16px 6px 16px 6px;
+            background: linear-gradient(135deg, var(--deep), var(--sea));
+            display: grid;
+            place-items: center;
+            color: white;
+            font-size: 20px;
+        }
+
+        .status-chip {
+            background: rgba(15, 60, 76, 0.12);
+            color: var(--deep);
+            padding: 8px 14px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 36px;
+        }
+
+        .hero h1 {
+            font-family: "Fraunces", "Times New Roman", serif;
+            font-weight: 700;
+            font-size: clamp(32px, 4vw, 44px);
+            line-height: 1.1;
+            margin: 0 0 20px;
+        }
+
+        .hero p {
+            font-size: 17px;
+            line-height: 1.7;
+            margin: 0 0 22px;
+        }
+
+        .highlight {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--mist);
+            color: var(--deep);
+            padding: 10px 16px;
+            border-radius: 999px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .feature-list {
+            margin: 28px 0 0;
+            display: grid;
+            gap: 16px;
+        }
+
+        .feature {
+            background: var(--paper);
+            border-radius: 18px;
+            padding: 16px 18px;
+            display: flex;
+            gap: 14px;
+            align-items: center;
+            box-shadow: 0 16px 32px rgba(10, 27, 34, 0.08);
+        }
+
+        .feature span {
+            font-weight: 600;
+        }
+
+        .quote-card {
+            background: var(--paper);
+            padding: 28px;
+            border-radius: 26px;
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .quote-card::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at top right, rgba(45, 167, 161, 0.18), transparent 55%);
+            pointer-events: none;
+        }
+
+        .quote-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 18px;
+            gap: 12px;
+        }
+
+        .quote-title {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .quote-meta {
+            display: grid;
+            gap: 12px;
+            margin: 20px 0 28px;
+        }
+
+        .meta-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 15px;
+        }
+
+        .meta-row strong {
+            color: var(--deep);
+        }
+
+        .amount {
+            font-size: 30px;
+            font-weight: 700;
+            color: var(--deep);
+        }
+
+        .actions {
+            display: grid;
+            gap: 12px;
+        }
+
+        .btn {
+            text-decoration: none;
+            font-weight: 600;
+            text-align: center;
+            padding: 14px 18px;
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--deep), var(--sea));
+            color: white;
+            box-shadow: 0 16px 28px rgba(15, 60, 76, 0.25);
+        }
+
+        .btn-secondary {
+            background: #f6fafb;
+            color: var(--deep);
+            border: 1px solid rgba(15, 60, 76, 0.18);
+        }
+
+        .btn-tertiary {
+            background: transparent;
+            color: rgba(11, 31, 42, 0.7);
+            text-decoration: underline;
+            font-size: 14px;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 12px 18px rgba(10, 27, 34, 0.12);
+        }
+
+        .support {
+            margin-top: 24px;
+            background: rgba(45, 167, 161, 0.12);
+            border-radius: 16px;
+            padding: 16px;
+            font-size: 14px;
+            color: var(--deep);
+        }
+
+        .footer {
+            margin-top: 40px;
+            font-size: 13px;
+            color: rgba(11, 31, 42, 0.6);
+        }
+
+        .fade-up {
+            opacity: 0;
+            transform: translateY(14px);
+            animation: fadeUp 0.8s ease forwards;
+        }
+
+        .delay-1 {
+            animation-delay: 0.1s;
+        }
+
+        .delay-2 {
+            animation-delay: 0.2s;
+        }
+
+        .delay-3 {
+            animation-delay: 0.3s;
+        }
+
+        .delay-4 {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes fadeUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 900px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .topbar {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .page {
+                padding: 28px 18px 56px;
+            }
+
+            .quote-card {
+                padding: 22px;
+            }
+
+            .actions .btn {
+                width: 100%;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .fade-up {
+                animation: none;
+                opacity: 1;
+                transform: none;
+            }
+
+            .btn {
+                transition: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <main class="page">
+        <div class="topbar fade-up">
+            <div class="brand">
+                <div class="brand-mark">H</div>
+                Hidrorey
+            </div>
+            <div class="status-chip">Cotización pendiente</div>
+        </div>
+
+        <section class="grid">
+            <div class="hero">
+                <div class="highlight fade-up delay-1">
+                    Seguimos listos para ayudarte con tu proyecto
+                </div>
+                <h1 class="fade-up delay-2">Hola, <span id="prospect-name">Cliente</span>. Tu propuesta está reservada.
+                </h1>
+                <p class="fade-up delay-3">
+                    Queremos que tengas todo claro antes de continuar. Aquí tienes el resumen de tu
+                    cotización y tres formas rápidas de avanzar con tu pedido.
+                </p>
+                <div class="feature-list">
+                    <div class="feature fade-up delay-2">
+                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
+                            aria-hidden="true">
+                            <path d="M12 4C8 8 6 10.5 6 14a6 6 0 0012 0c0-3.5-2-6-6-10z" fill="#2da7a1" />
+                        </svg>
+                        <span>Asesoría técnica especializada en equipos hidráulicos.</span>
+                    </div>
+                    <div class="feature fade-up delay-3">
+                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
+                            aria-hidden="true">
+                            <path d="M4 12h16M12 4v16" stroke="#0f3c4c" stroke-width="2" stroke-linecap="round" />
+                        </svg>
+                        <span>Disponibilidad y tiempos de entrega confirmados.</span>
+                    </div>
+                    <div class="feature fade-up delay-4">
+                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
+                            aria-hidden="true">
+                            <path d="M5 12l4 4L19 6" stroke="#f2c14e" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                        </svg>
+                        <span>Seguimiento postventa para que tu operación no se detenga.</span>
+                    </div>
+                </div>
+                <div class="footer fade-up delay-4">
+                    ¿Necesitas ajustar cantidades o condiciones? Solo responde al correo y lo resolvemos.
+                </div>
+            </div>
+
+            <aside class="quote-card fade-up delay-2">
+                <div class="quote-header">
+                    <div class="quote-title">Resumen de tu cotización</div>
+                    <span class="status-chip">Referencia <span id="quote-id">--</span></span>
+                </div>
+                <div class="amount" id="amount">$0</div>
+                <div class="quote-meta">
+                    <div class="meta-row">
+                        <span>Fecha de emisión</span>
+                        <strong id="created-at">--</strong>
+                    </div>
+                    <div class="meta-row">
+                        <span>Vigencia</span>
+                        <strong>Por confirmar contigo</strong>
+                    </div>
+                    <div class="meta-row">
+                        <span>Asesor asignado</span>
+                        <strong>Equipo Hidrorey</strong>
+                    </div>
+                </div>
+                <div class="actions">
+                    <a class="btn btn-primary" id="btn-buy" href="#">
+                        Confirmar compra ahora
+                    </a>
+                    <a class="btn btn-secondary" id="btn-talk" href="#">
+                        Quiero hablar con un asesor
+                    </a>
+                    <a class="btn btn-tertiary" id="btn-cancel" href="#">
+                        Ya no estoy interesado
+                    </a>
+                </div>
+                <div class="support">
+                    Si necesitas facturación, métodos de pago o una revisión rápida de la propuesta,
+                    estamos listos para ayudarte hoy.
+                </div>
+            </aside>
+        </section>
+    </main>
+
+    <script>
+        const formatMoney = (value, currency = "MXN") => {
+            if (typeof value !== "number") {
+                return value;
+            }
+            return new Intl.NumberFormat("es-MX", {
+                style: "currency",
+                currency,
+                maximumFractionDigits: 0,
+            }).format(value);
+        };
+
+        const setText = (id, value) => {
+            const node = document.getElementById(id);
+            if (node && value !== undefined && value !== null) {
+                node.textContent = value;
+            }
+        };
+
+        const setLink = (id, url) => {
+            const node = document.getElementById(id);
+            if (node && url) {
+                node.setAttribute("href", url);
+            }
+        };
+
+        const applyQuote = (data) => {
+            setText("prospect-name", data.prospect_name);
+            setText("quote-id", data.quote_id);
+            setText("created-at", data.created_at);
+            setText("amount", formatMoney(data.amount, data.currency));
+            setLink("btn-buy", `${data.domain}/buy/${data.transaction_id}`);
+            setLink("btn-talk", `${data.domain}/talk/${data.transaction_id}`);
+            setLink("btn-cancel", `${data.domain}/cancel/${data.transaction_id}`);
+        };
+
+        const showError = () => {
+            const fallback = {
+                prospect_name: "Cliente",
+                quote_id: "--",
+                amount: 0,
+                created_at: "--",
+            };
+            applyQuote(fallback);
+        };
+
+        document.addEventListener("DOMContentLoaded", async () => {
+            try {
+                const response = await fetch("/api/quote", { credentials: "include" });
+                if (!response.ok) {
+                    throw new Error("API error");
+                }
+                const data = await response.json();
+                applyQuote(data);
+            } catch (error) {
+                showError();
+            }
+        });
+    </script>
+</body>
+
+</html>
