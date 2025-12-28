@@ -1,9 +1,8 @@
-from model import Quote
-from typing import List, Set
+from model import Quote, CustomerType
+from typing import List, Set, Tuple
 from datetime import datetime
 import yaml
 import logging
-
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -15,30 +14,57 @@ class QuoteFilter:
     ) -> None:
         self.quotes = quotes
         self.email_cadence_config = email_cadence_config
-        self.allow_list_set = self._parse_allowlist(allowlist_path)
+        self.prospect_allowlist, self.customer_allowlist = self._parse_allowlist(
+            allowlist_path
+        )
 
-    def _parse_allowlist(self, allow_list_path: str) -> Set[str]:
-        """Parse the allowlist file to get a set of allowed quote IDs."""
-
+    def _parse_allowlist(self, allow_list_path: str) -> tuple[set[str], set[str]]:
         try:
             with open(allow_list_path, "r", encoding="utf-8") as f:
-                data = yaml.safe_load(f)
-                allowed_ids = set(map(str, data.get("ids", [])))
-                logger.info(f"Parsed allowlist with {len(allowed_ids)} IDs")
-                return allowed_ids
+                data = yaml.safe_load(f) or {}
+
+                prospect_raw = data.get("prospect_ids") or []
+                customer_raw = data.get("customer_ids") or []
+
+                prospect_ids = set(map(str, prospect_raw))
+                customer_ids = set(map(str, customer_raw))
+
+                logger.info(
+                    "Parsed allowlist: %d prospect_ids, %d customer_ids",
+                    len(prospect_ids),
+                    len(customer_ids),
+                )
+
+                return prospect_ids, customer_ids
+
         except Exception as e:
-            logger.error(f"Error reading allowlist file: {e}", exc_info=True)
-            return set()
+            logger.error("Error reading allowlist file: %s", e, exc_info=True)
+            return set(), set()
 
     def filter_quotes(self) -> List[Quote]:
-        """Filter quotes based on the email cadence configuration."""
-        filtered_quotes = []
+        """Filter quotes based on cadence + allowlist by customer type."""
+        filtered_quotes: List[Quote] = []
         now = datetime.now()
+
         for quote in self.quotes:
             days_since_creation = (now - datetime.fromisoformat(quote.created_at)).days
-            if (
-                days_since_creation in self.email_cadence_config
-                and quote.id in self.allow_list_set
-            ):
-                filtered_quotes.append(quote)
+            if days_since_creation not in self.email_cadence_config:
+                continue
+            if quote.customer_type == CustomerType.PROSPECT:
+                if quote.prospect.id not in self.prospect_allowlist:
+                    continue
+            elif quote.customer_type == CustomerType.CLIENT:
+                if quote.prospect.id not in self.customer_allowlist:
+                    continue
+            else:
+                continue
+
+            logger.info(
+                "Allowed quote=%s customer_type=%s prospect_id=%s",
+                quote.id,
+                quote.customer_type.value,
+                quote.prospect.id,
+            )
+            filtered_quotes.append(quote)
+
         return filtered_quotes

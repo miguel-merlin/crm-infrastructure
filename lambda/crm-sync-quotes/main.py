@@ -23,7 +23,7 @@ SENDER = "SENDER_EMAIL"
 DOMANAIN = "DOMAIN"
 TEMPLATE_PATH = "assets/template.html"
 SALES_REPS_PATH = "assets/sales_rep.csv"
-EMAIL_CADENCE_DAYS = set([3, 5, 7])
+EMAIL_CADENCE_DAYS = set([3, 5, 8])
 ALLOW_LIST_PATH = "assets/allowlist.yaml"
 
 
@@ -56,7 +56,9 @@ def handler(event, context):
     transactions_table: Table = dynamodb.Table(safe_get_env(TABLE_NAME))
     quote_filter = QuoteFilter(quotes, EMAIL_CADENCE_DAYS, ALLOW_LIST_PATH)
     filtered_quotes = quote_filter.filter_quotes()
-    logger.info(f"Filtered down to {len(filtered_quotes)} quotes after applying cadence and allowlist")
+    logger.info(
+        f"Filtered down to {len(filtered_quotes)} quotes after applying cadence and allowlist"
+    )
     # email_sender = QuoteEmailSender(
     #     quotes=filtered_quotes,
     #     template_path=TEMPLATE_PATH,
@@ -66,3 +68,15 @@ def handler(event, context):
     # )
     # email_sender.send_emails()
     return {"statusCode": 200, "body": "Processing completed successfully."}
+
+
+if __name__ == "__main__":
+    qp = QuoteParser("test/data/test.zip", SALES_REPS_PATH)
+    quotes = qp.read_quotes_from_zip()
+    print(f"Total quotes parsed: {len(quotes)}")
+
+    qf = QuoteFilter(quotes, EMAIL_CADENCE_DAYS, ALLOW_LIST_PATH)
+    filtered_quotes = qf.filter_quotes()
+    print(f"Filtered quotes count: {len(filtered_quotes)}")
+    for quote in filtered_quotes:
+        print(quote)

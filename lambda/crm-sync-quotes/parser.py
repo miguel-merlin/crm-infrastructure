@@ -1,5 +1,5 @@
 from typing import List, Dict, Optional
-from model import Quote, Prospect, QuoteStatus, SalesRep
+from model import Quote, Prospect, QuoteStatus, SalesRep, CustomerType
 from utils import extract_email, find_file
 import logging
 import tempfile
@@ -111,10 +111,10 @@ class QuoteParser:
             no_cot = rec.get("NO_COT")
             cve_prod = rec.get("CVE_PROD")
             if no_cot is not None and cve_prod:
-                quote_keys = str(int(no_cot)).strip()
-                if no_cot not in items_by_quote:
-                    items_by_quote[quote_keys] = []
-                items_by_quote[quote_keys].append(str(cve_prod).strip())
+                quote_id = str(int(no_cot)).strip()
+                if quote_id not in items_by_quote:
+                    items_by_quote[quote_id] = []
+                items_by_quote[quote_id].append(str(cve_prod).strip())
         return items_by_quote
 
     def _parse_prospect_from_prospect_dbf(
@@ -144,6 +144,14 @@ class QuoteParser:
         status_upper = status_str.strip().upper()
         return STATUS_MAPPING.get(status_upper, QuoteStatus.SENT)
 
+    def _map_customer_type(self, tipo_cte: str) -> Optional[CustomerType]:
+        t = (tipo_cte or "").strip().upper()
+        if t == CustomerType.PROSPECT.value:
+            return CustomerType.PROSPECT
+        if t == CustomerType.CLIENT.value:
+            return CustomerType.CLIENT
+        return None
+
     def _parse_quote(
         self,
         cotizac_rec: Dict,
@@ -155,6 +163,10 @@ class QuoteParser:
         no_cot = str(cotizac_rec.get("NO_COT"))
         cve_cte = cotizac_rec.get("CVE_CTE")
         tipo_cte = cotizac_rec.get("TIPO_CTE", "").strip().upper()
+        customer_type = self._map_customer_type(tipo_cte)
+        if not customer_type:
+            logger.debug(f"Skipping quote {no_cot}: Unknown customer type {tipo_cte}")
+            return None
         cve_age = str(cotizac_rec.get("CVE_AGE", "")).strip()
         total_cot = cotizac_rec.get("TOTAL_COT")
         status_str = cotizac_rec.get("STATUS", "").strip().upper()
@@ -183,6 +195,7 @@ class QuoteParser:
             sales_rep = SalesRep(id=cve_age, name="", email="", phone_number="")
         return Quote(
             id=no_cot,
+            customer_type=customer_type,
             prospect=prospect,
             sales_rep=sales_rep,
             item_ids=item_ids,

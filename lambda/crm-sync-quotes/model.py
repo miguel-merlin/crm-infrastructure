@@ -12,6 +12,14 @@ class QuoteStatus(Enum):
         return self.value
 
 
+class CustomerType(Enum):
+    PROSPECT = "P"
+    CLIENT = "C"
+
+    def __str__(self) -> str:
+        return self.value
+
+
 @dataclass
 class Prospect:
     id: str
@@ -30,6 +38,7 @@ class SalesRep:
 @dataclass
 class Quote:
     id: str
+    customer_type: CustomerType
     prospect: Prospect
     sales_rep: SalesRep
     item_ids: list[str]
@@ -40,6 +49,7 @@ class Quote:
     def to_dynamodb_item(self) -> dict:
         return {
             "quote_id": self.id,
+            "customer_type": self.customer_type.value,
             "prospect_id": self.prospect.id,
             "prospect_name": self.prospect.name,
             "prospect_email": self.prospect.email,
