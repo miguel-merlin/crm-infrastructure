@@ -101,9 +101,14 @@
         <p>¿Cómo deseas continuar?</p>
 
         <div class="actions">
-            <a href="{{ domain }}/buy/{{ transaction_id }}" class="btn btn-buy">Quiero Comprar</a>
-            <a href="{{ domain }}/talk/{{ transaction_id }}" class="btn btn-talk">Hablar con un Asesor</a>
-            <a href="{{ domain }}/cancel/{{ transaction_id }}" class="btn btn-cancel">Ya NO estoy interesado</a>
+            <a href="{{ domain }}/transaction_id={{ transaction_id }}&response=buy" class="btn btn-buy">Quiero
+                Comprar</a>
+            <a href="{{ domain }}/transaction_id={{ transaction_id }}&response=more_info" class="btn btn-talk">Hablar
+                con un
+                Asesor</a>
+            <a href="{{ domain }}/transaction_id={{ transaction_id }}&response=not_interested" class="btn btn-cancel">Ya
+                NO estoy
+                interesado</a>
         </div>
 
         <div class="footer">

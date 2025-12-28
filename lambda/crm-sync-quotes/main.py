@@ -68,15 +68,3 @@ def handler(event, context):
     )
     email_sender.send_emails()
     return {"statusCode": 200, "body": "Processing completed successfully."}
-
-
-if __name__ == "__main__":
-    qp = QuoteParser("test/data/test.zip", SALES_REPS_PATH)
-    quotes = qp.read_quotes_from_zip()
-    print(f"Total quotes parsed: {len(quotes)}")
-
-    qf = QuoteFilter(quotes, EMAIL_CADENCE_DAYS, ALLOW_LIST_PATH)
-    filtered_quotes = qf.filter_quotes()
-    print(f"Filtered quotes count: {len(filtered_quotes)}")
-    for quote in filtered_quotes:
-        print(quote)
