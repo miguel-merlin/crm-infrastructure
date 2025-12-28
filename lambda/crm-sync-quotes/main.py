@@ -59,14 +59,14 @@ def handler(event, context):
     logger.info(
         f"Filtered down to {len(filtered_quotes)} quotes after applying cadence and allowlist"
     )
-    # email_sender = QuoteEmailSender(
-    #     quotes=filtered_quotes,
-    #     template_path=TEMPLATE_PATH,
-    #     sender_email=safe_get_env(SENDER),
-    #     transactions_table=transactions_table,
-    #     domain=safe_get_env(DOMANAIN),
-    # )
-    # email_sender.send_emails()
+    email_sender = QuoteEmailSender(
+        quotes=filtered_quotes,
+        template_path=TEMPLATE_PATH,
+        sender_email=safe_get_env(SENDER),
+        transactions_table=transactions_table,
+        domain=safe_get_env(DOMANAIN),
+    )
+    email_sender.send_emails()
     return {"statusCode": 200, "body": "Processing completed successfully."}
 
 
