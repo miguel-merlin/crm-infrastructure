@@ -45,7 +45,7 @@ export default class ApiResponse extends Construct {
         type: dynamodb.AttributeType.STRING,
       },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
-      removalPolicy: cdk.RemovalPolicy.DESTROY, // Change to RETAIN for production
+      removalPolicy: cdk.RemovalPolicy.RETAIN, // Change to RETAIN for production
     });
 
     const codePath = props.lambdaCodePath || path.join(__dirname, "../lambda");
