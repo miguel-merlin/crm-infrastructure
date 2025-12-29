@@ -71,14 +71,27 @@ def create_response(
 
 def save_to_dynamodb(record: ResponseRecord) -> Tuple[bool, Optional[str]]:
     try:
-        table.put_item(Item=record.to_dict())
+        table.put_item(
+            Item=record.to_dict(),
+            ConditionExpression="attribute_not_exists(email_transaction_id)",
+        )
         return True, None
+
     except ClientError as e:
-        error_code = e.response["Error"]["Code"]  # type: ignore
-        error_message = e.response["Error"]["Message"]  # type: ignore
-        return False, f"DynamoDB error ({error_code}): {error_message}"
+        err = e.response.get("Error", {}) or {}
+        code = err.get("Code")
+        message = err.get("Message")
+
+        if code == "ConditionalCheckFailedException":
+            return True, "Record already exists"  # idempotent case
+
+        return (
+            False,
+            f"DynamoDB error ({code or 'UnknownCode'}): {message or 'No message'}",
+        )
+
     except Exception as e:
-        return False, f"Unexpected error: {str(e)}"
+        return False, f"Unexpected error: {e}"
 
 
 def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:

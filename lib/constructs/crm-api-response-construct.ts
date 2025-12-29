@@ -41,7 +41,7 @@ export default class ApiResponse extends Construct {
     this.table = new dynamodb.Table(this, "Table", {
       tableName: props.tableName,
       partitionKey: {
-        name: "response_id",
+        name: "email_transaction_id",
         type: dynamodb.AttributeType.STRING,
       },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
