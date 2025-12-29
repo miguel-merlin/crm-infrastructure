@@ -42,6 +42,7 @@ class QuoteEmailSender:
             created_at=quote.created_at,
             transaction_id=transaction_id,
             domain=self.domain,
+            prospect_id=quote.prospect.id,
         )
 
     def _batch_write_transactions(self, transactions: List[EmailTransaction]) -> None:

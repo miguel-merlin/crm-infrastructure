@@ -289,6 +289,7 @@
             const params = new URLSearchParams(window.location.search);
             const transactionId = params.get("transaction_id") || "";
             const response = params.get("response") || "";
+            const prospectId = params.get("prospect_id") || "";
             const responseMessage = document.getElementById("response-message");
 
             if (transactionId) {
