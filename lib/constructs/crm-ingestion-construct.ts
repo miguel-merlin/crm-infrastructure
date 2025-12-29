@@ -89,5 +89,35 @@ export default class CrmIngestion extends Construct {
       s3.EventType.OBJECT_CREATED,
       new s3n.LambdaDestination(this.processor)
     );
+
+    new cdk.CfnOutput(this, "IngestionBucketName", {
+      value: this.bucket.bucketName,
+      description: "S3 bucket used for CRM ingestion uploads",
+    });
+
+    new cdk.CfnOutput(this, "IngestionBucketArn", {
+      value: this.bucket.bucketArn,
+      description: "S3 bucket ARN for CRM ingestion uploads",
+    });
+
+    new cdk.CfnOutput(this, "IngestionTableName", {
+      value: this.table.tableName,
+      description: "DynamoDB table for CRM quotes/emails transactions",
+    });
+
+    new cdk.CfnOutput(this, "IngestionTableArn", {
+      value: this.table.tableArn,
+      description: "DynamoDB table ARN for CRM quotes/emails transactions",
+    });
+
+    new cdk.CfnOutput(this, "IngestionProcessorName", {
+      value: this.processor.functionName,
+      description: "Lambda name for CRM ingestion processing",
+    });
+
+    new cdk.CfnOutput(this, "IngestionProcessorArn", {
+      value: this.processor.functionArn,
+      description: "Lambda ARN for CRM ingestion processing",
+    });
   }
 }

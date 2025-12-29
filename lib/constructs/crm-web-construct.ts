@@ -114,6 +114,26 @@ export default class Website extends Construct {
       description: "CloudFront Distribution Domain Name",
     });
 
+    new cdk.CfnOutput(this, "LandingBucketName", {
+      value: this.bucket.bucketName,
+      description: "S3 bucket name for the CRM landing page",
+    });
+
+    new cdk.CfnOutput(this, "LandingBucketArn", {
+      value: this.bucket.bucketArn,
+      description: "S3 bucket ARN for the CRM landing page",
+    });
+
+    new cdk.CfnOutput(this, "LandingDistributionId", {
+      value: this.distribution.distributionId,
+      description: "CloudFront distribution ID for the landing page",
+    });
+
+    new cdk.CfnOutput(this, "LandingDistributionDomain", {
+      value: this.distribution.distributionDomainName,
+      description: "CloudFront domain for the landing page",
+    });
+
     new cdk.CfnOutput(this, "s3-website-url", {
       value: this.bucket.bucketWebsiteUrl,
       description: "S3 Bucket Website URL",

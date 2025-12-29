@@ -72,5 +72,35 @@ export default class ApiResponse extends Construct {
         allowMethods: apigateway.Cors.ALL_METHODS,
       },
     });
+
+    new cdk.CfnOutput(this, "ApiEndpointUrl", {
+      value: this.api.url,
+      description: "Base URL for the CRM API Gateway endpoint",
+    });
+
+    new cdk.CfnOutput(this, "ApiId", {
+      value: this.api.restApiId,
+      description: "API Gateway REST API ID",
+    });
+
+    new cdk.CfnOutput(this, "ApiTableName", {
+      value: this.table.tableName,
+      description: "DynamoDB table storing CRM API responses",
+    });
+
+    new cdk.CfnOutput(this, "ApiTableArn", {
+      value: this.table.tableArn,
+      description: "DynamoDB table ARN storing CRM API responses",
+    });
+
+    new cdk.CfnOutput(this, "ApiHandlerName", {
+      value: this.handler.functionName,
+      description: "Lambda name for CRM API responses",
+    });
+
+    new cdk.CfnOutput(this, "ApiHandlerArn", {
+      value: this.handler.functionArn,
+      description: "Lambda ARN for CRM API responses",
+    });
   }
 }
