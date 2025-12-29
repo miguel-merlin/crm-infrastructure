@@ -272,13 +272,13 @@
 
         const API_GATEWAY_URL = "https://your-api-gateway-url.execute-api.region.amazonaws.com";
 
-        const postResponse = ({ email_transaction_id, response }) => {
+        const postResponse = ({ email_transaction_id, response, prospect_id }) => {
             fetch(`${API_GATEWAY_URL}/response`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ email_transaction_id, response }),
+                body: JSON.stringify({ email_transaction_id, response, prospect_id }),
                 keepalive: true,
             }).catch(() => {
                 // Best-effort tracking; no UI changes needed.
@@ -310,6 +310,7 @@
             postResponse({
                 email_transaction_id: transactionId,
                 response,
+
             });
         });
     </script>
