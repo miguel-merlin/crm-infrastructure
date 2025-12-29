@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recordatorio de Cotización | Hidrorey</title>
+    <title>Recordatorio | Hidrorey</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -111,26 +111,6 @@
             font-weight: 600;
         }
 
-        .feature-list {
-            margin: 28px 0 0;
-            display: grid;
-            gap: 16px;
-        }
-
-        .feature {
-            background: var(--paper);
-            border-radius: 18px;
-            padding: 16px 18px;
-            display: flex;
-            gap: 14px;
-            align-items: center;
-            box-shadow: 0 16px 32px rgba(10, 27, 34, 0.08);
-        }
-
-        .feature span {
-            font-weight: 600;
-        }
-
         .quote-card {
             background: var(--paper);
             padding: 28px;
@@ -161,69 +141,14 @@
             font-weight: 700;
         }
 
-        .quote-meta {
-            display: grid;
-            gap: 12px;
-            margin: 20px 0 28px;
-        }
-
-        .meta-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+        .response-message {
+            margin: 16px 0 0;
+            padding: 16px;
+            border-radius: 16px;
+            background: rgba(45, 167, 161, 0.12);
+            color: var(--deep);
             font-size: 15px;
-        }
-
-        .meta-row strong {
-            color: var(--deep);
-        }
-
-        .amount {
-            font-size: 30px;
-            font-weight: 700;
-            color: var(--deep);
-        }
-
-        .actions {
-            display: grid;
-            gap: 12px;
-        }
-
-        .btn {
-            text-decoration: none;
-            font-weight: 600;
-            text-align: center;
-            padding: 14px 18px;
-            border-radius: 12px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, var(--deep), var(--sea));
-            color: white;
-            box-shadow: 0 16px 28px rgba(15, 60, 76, 0.25);
-        }
-
-        .btn-secondary {
-            background: #f6fafb;
-            color: var(--deep);
-            border: 1px solid rgba(15, 60, 76, 0.18);
-        }
-
-        .btn-tertiary {
-            background: transparent;
-            color: rgba(11, 31, 42, 0.7);
-            text-decoration: underline;
-            font-size: 14px;
-        }
-
-        .btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 12px 18px rgba(10, 27, 34, 0.12);
+            line-height: 1.6;
         }
 
         .support {
@@ -316,100 +241,28 @@
                 <div class="brand-mark">H</div>
                 Hidrorey
             </div>
-            <div class="status-chip">Cotización pendiente</div>
+            <div class="status-chip">Seguimiento pendiente</div>
         </div>
 
         <section class="grid">
             <div class="hero">
                 <div class="highlight fade-up delay-1">
-                    Seguimos listos para ayudarte con tu proyecto
+                    Seguimos listos para ayudarte
                 </div>
-                <h1 class="fade-up delay-2">Hola, <span id="prospect-name">Cliente</span>. Tu propuesta está reservada.
+                <h1 class="fade-up delay-2">Hola! Espera una respuesta pronto!
                 </h1>
                 <p class="fade-up delay-3">
-                    Queremos que tengas todo claro antes de continuar. Aquí tienes el resumen de tu
-                    cotización y tres formas rápidas de avanzar con tu pedido.
+                    Recibiste un recordatorio sobre tu cotización pendiente. Este espacio confirma la
+                    respuesta que elegiste en el correo.
                 </p>
-                <div class="feature-list">
-                    <div class="feature fade-up delay-2">
-                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
-                            aria-hidden="true">
-                            <path d="M12 4C8 8 6 10.5 6 14a6 6 0 0012 0c0-3.5-2-6-6-10z" fill="#2da7a1" />
-                        </svg>
-                        <span>Asesoría técnica especializada en equipos hidráulicos.</span>
-                    </div>
-                    <div class="feature fade-up delay-3">
-                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
-                            aria-hidden="true">
-                            <path d="M4 12h16M12 4v16" stroke="#0f3c4c" stroke-width="2" stroke-linecap="round" />
-                        </svg>
-                        <span>Disponibilidad y tiempos de entrega confirmados.</span>
-                    </div>
-                    <div class="feature fade-up delay-4">
-                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
-                            aria-hidden="true">
-                            <path d="M5 12l4 4L19 6" stroke="#f2c14e" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round" />
-                        </svg>
-                        <span>Seguimiento postventa para que tu operación no se detenga.</span>
-                    </div>
-                </div>
                 <div class="footer fade-up delay-4">
-                    ¿Necesitas ajustar cantidades o condiciones? Solo responde al correo y lo resolvemos.
+                    Si algo cambió o necesitas apoyo adicional, puedes responder al mismo correo.
                 </div>
             </div>
-
-            <aside class="quote-card fade-up delay-2">
-                <div class="quote-header">
-                    <div class="quote-title">Resumen de tu cotización</div>
-                    <span class="status-chip">Referencia <span id="quote-id">--</span></span>
-                </div>
-                <div class="amount" id="amount">$0</div>
-                <div class="quote-meta">
-                    <div class="meta-row">
-                        <span>Fecha de emisión</span>
-                        <strong id="created-at">--</strong>
-                    </div>
-                    <div class="meta-row">
-                        <span>Vigencia</span>
-                        <strong>Por confirmar contigo</strong>
-                    </div>
-                    <div class="meta-row">
-                        <span>Asesor asignado</span>
-                        <strong>Equipo Hidrorey</strong>
-                    </div>
-                </div>
-                <div class="actions">
-                    <a class="btn btn-primary" id="btn-buy" href="#">
-                        Confirmar compra ahora
-                    </a>
-                    <a class="btn btn-secondary" id="btn-talk" href="#">
-                        Quiero hablar con un asesor
-                    </a>
-                    <a class="btn btn-tertiary" id="btn-cancel" href="#">
-                        Ya no estoy interesado
-                    </a>
-                </div>
-                <div class="support">
-                    Si necesitas facturación, métodos de pago o una revisión rápida de la propuesta,
-                    estamos listos para ayudarte hoy.
-                </div>
-            </aside>
         </section>
     </main>
 
     <script>
-        const formatMoney = (value, currency = "MXN") => {
-            if (typeof value !== "number") {
-                return value;
-            }
-            return new Intl.NumberFormat("es-MX", {
-                style: "currency",
-                currency,
-                maximumFractionDigits: 0,
-            }).format(value);
-        };
-
         const setText = (id, value) => {
             const node = document.getElementById(id);
             if (node && value !== undefined && value !== null) {
@@ -417,44 +270,46 @@
             }
         };
 
-        const setLink = (id, url) => {
-            const node = document.getElementById(id);
-            if (node && url) {
-                node.setAttribute("href", url);
+        const API_GATEWAY_URL = "https://your-api-gateway-url.execute-api.region.amazonaws.com";
+
+        const postResponse = ({ email_transaction_id, response }) => {
+            fetch(`${API_GATEWAY_URL}/response`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ email_transaction_id, response }),
+                keepalive: true,
+            }).catch(() => {
+                // Best-effort tracking; no UI changes needed.
+            });
+        };
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const params = new URLSearchParams(window.location.search);
+            const transactionId = params.get("transaction_id") || "";
+            const response = params.get("response") || "";
+            const responseMessage = document.getElementById("response-message");
+
+            if (transactionId) {
+                setText("quote-id", transactionId);
             }
-        };
 
-        const applyQuote = (data) => {
-            setText("prospect-name", data.prospect_name);
-            setText("quote-id", data.quote_id);
-            setText("created-at", data.created_at);
-            setText("amount", formatMoney(data.amount, data.currency));
-            setLink("btn-buy", `${data.domain}/buy/${data.transaction_id}`);
-            setLink("btn-talk", `${data.domain}/talk/${data.transaction_id}`);
-            setLink("btn-cancel", `${data.domain}/cancel/${data.transaction_id}`);
-        };
-
-        const showError = () => {
-            const fallback = {
-                prospect_name: "Cliente",
-                quote_id: "--",
-                amount: 0,
-                created_at: "--",
-            };
-            applyQuote(fallback);
-        };
-
-        document.addEventListener("DOMContentLoaded", async () => {
-            try {
-                const response = await fetch("/api/quote", { credentials: "include" });
-                if (!response.ok) {
-                    throw new Error("API error");
-                }
-                const data = await response.json();
-                applyQuote(data);
-            } catch (error) {
-                showError();
+            if (responseMessage) {
+                const messageMap = {
+                    buy: "Gracias por confirmar tu interés en continuar. Ya estamos gestionando el siguiente paso.",
+                    more_info: "Gracias por pedir más información. Un asesor te contactará con los detalles.",
+                    not_interested: "Gracias por avisarnos. Cerraremos el seguimiento asociado a tu recordatorio.",
+                };
+                responseMessage.textContent =
+                    messageMap[response] ||
+                    "Recibimos tu respuesta. En breve te confirmaremos los siguientes pasos.";
             }
+
+            postResponse({
+                email_transaction_id: transactionId,
+                response,
+            });
         });
     </script>
 </body>
