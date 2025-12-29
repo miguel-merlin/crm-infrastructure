@@ -1,6 +1,7 @@
 import * as cdk from "aws-cdk-lib";
 import CrmIngestion from "./constructs/crm-ingestion-construct";
 import ApiResponse from "./constructs/crm-api-response-construct";
+import Website from "./constructs/crm-web-construct";
 import { Construct } from "constructs";
 
 const DOMAIN = "hidrorey.info";
@@ -32,6 +33,17 @@ export class CrmInfraStack extends cdk.Stack {
         EMAIL_TRANSACTION_TABLE_NAME: crmIngestion.table.tableName,
         SENDER_EMAIL: "contacto@" + DOMAIN,
       },
+    });
+
+    new Website(this, "LandingPage", {
+      bucketName: "crm-landing-page-bucket",
+      indexFile: "index.html",
+      errorFile: "index.html",
+      // domainConfig: {
+      //   domainName: DOMAIN,
+      //   subdomainName: "www",
+      //   certificateArn: "arn:aws:acm:us-east-1:123456789012:certificate/your-certificate-id",
+      // },
     });
   }
 }
