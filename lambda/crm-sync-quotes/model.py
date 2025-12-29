@@ -76,6 +76,7 @@ class EmailTransaction:
     email_address: str
     sent_at: str
     status: EmailStatus
+    sales_rep: SalesRep
 
     def to_dynamodb_item(self) -> dict:
         return {

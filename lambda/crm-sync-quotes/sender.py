@@ -81,6 +81,7 @@ class QuoteEmailSender:
                     email_address=quote.prospect.email,
                     sent_at=datetime.now().isoformat(),
                     status=EmailStatus.SENT,
+                    sales_rep=quote.sales_rep,
                 )
                 email_transactions.append(email_transaction)
             except Exception as e:
