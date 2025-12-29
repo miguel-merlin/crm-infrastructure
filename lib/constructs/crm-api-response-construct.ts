@@ -71,6 +71,10 @@ export default class ApiResponse extends Construct {
         allowOrigins: apigateway.Cors.ALL_ORIGINS,
         allowMethods: apigateway.Cors.ALL_METHODS,
       },
+      deployOptions: {
+        throttlingRateLimit: 50,
+        throttlingBurstLimit: 60,
+      },
     });
 
     new cdk.CfnOutput(this, "ApiEndpointUrl", {
