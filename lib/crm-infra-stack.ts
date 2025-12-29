@@ -8,7 +8,7 @@ export class CrmInfraStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    new CrmIngestion(this, "QuotesIngestion", {
+    const crmIngestion = new CrmIngestion(this, "QuotesIngestion", {
       tableName: "crm-quotes-emails-transactions",
       partitionKeyName: "transaction_id",
       codePath: "./lambda/crm-sync-quotes",
@@ -28,6 +28,10 @@ export class CrmInfraStack extends cdk.Stack {
       tableName: "crm-api-responses",
       lambdaCodePath: "./lambda/crm-web-response",
       enableCors: true,
+      lambdaEnvVars: {
+        EMAIL_TRANSACTION_TABLE_NAME: crmIngestion.table.tableName,
+        SENDER_EMAIL: "contacto@" + DOMAIN,
+      },
     });
   }
 }

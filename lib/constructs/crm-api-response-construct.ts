@@ -23,6 +23,11 @@ export interface ApiResponseProps {
    * If not provided, a unique name will be generated.
    */
   tableName?: string;
+
+  /**
+   * Optional environment variables to set for the Lambda function.
+   */
+  lambdaEnvVars?: { [key: string]: string };
 }
 
 export default class ApiResponse extends Construct {
