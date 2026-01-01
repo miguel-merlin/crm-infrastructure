@@ -40,8 +40,7 @@ This process begins when a user clicks a link in the email.
 
 1.  **User Action**:
     *   User lands on the static website (CloudFront/S3).
-    *   User selects an option (e.g., "I'm interested").
-    *   Frontend sends `POST` request to API Gateway.
+    *   Frontend sends `POST` request to API Gateway based on the click-to-action on the email.
 
 2.  **API Handling (Lambda)**:
     *   **Trigger**: API Gateway invokes `crm-web-response`.
