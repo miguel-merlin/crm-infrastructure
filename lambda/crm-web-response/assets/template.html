@@ -3,99 +3,219 @@
 
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Respuesta del Cliente a la Cotización</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>Respuesta del Cliente a la Cotización | Hidrorey</title>
+
     <style>
+        :root {
+            --hydro-red: rgb(228, 14, 32);
+            --hydro-blue: rgb(0, 63, 110);
+            --hydro-cyan: rgb(0, 176, 225);
+
+            --ink: rgb(11, 31, 42);
+            --muted: rgba(11, 31, 42, 0.68);
+            --paper: #ffffff;
+            --wash: rgba(0, 176, 225, 0.08);
+            --line: rgba(0, 63, 110, 0.16);
+
+            --radius: 16px;
+        }
+
+        html,
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            line-height: 1.6;
-            color: #333;
             margin: 0;
             padding: 0;
-            background-color: #f9f9f9;
+        }
+
+        body {
+            font-family: "Futura Std", Futura, "Trebuchet MS", Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--ink);
+            background: #f9fbfc;
+        }
+
+        .wrapper {
+            width: 100%;
+            padding: 24px 14px;
+            background: linear-gradient(180deg, #f9fbfc 0%, var(--wash) 100%);
         }
 
         .container {
             max-width: 600px;
-            margin: 20px auto;
-            padding: 40px;
-            background-color: #ffffff;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            margin: 0 auto;
+            background: var(--paper);
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+
+        .top-accent {
+            height: 6px;
+            background: linear-gradient(90deg,
+                    var(--hydro-red),
+                    var(--hydro-cyan),
+                    var(--hydro-blue));
+        }
+
+        .header {
+            padding: 18px 20px 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo {
+            height: 34px;
+            width: auto;
+            display: block;
+        }
+
+        .subtitle {
+            margin: 0;
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        .content {
+            padding: 8px 20px 20px;
         }
 
         h1 {
-            font-size: 20px;
-            font-weight: 600;
-            margin-bottom: 24px;
-            color: #111;
+            margin: 10px 0 10px;
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--ink);
         }
 
         p {
-            margin-bottom: 16px;
-            font-size: 16px;
+            margin: 0 0 14px;
+            font-size: 14px;
+            color: var(--ink);
         }
 
-        .quote-info {
-            border-left: 4px solid #e5e7eb;
-            padding-left: 16px;
-            margin: 24px 0;
-            color: #666;
+        .card {
+            margin: 14px 0 18px;
+            padding: 14px;
+            border-radius: 12px;
+            border: 1px solid var(--line);
+            background: rgba(0, 63, 110, 0.03);
         }
 
-        .actions {
-            margin-top: 32px;
+        .row {
+            margin: 0 0 8px;
+            font-size: 13px;
+            color: var(--ink);
         }
 
-        .btn {
-            display: block;
-            width: 100%;
-            max-width: 250px;
-            margin-bottom: 12px;
-            padding: 12px 20px;
-            text-align: center;
-            text-decoration: none;
-            border-radius: 6px;
-            font-weight: 500;
-            font-size: 16px;
+        .row:last-child {
+            margin-bottom: 0;
         }
 
-        .btn-primary {
-            background-color: #000;
-            color: #fff !important;
+        .label {
+            color: var(--hydro-blue);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            font-size: 11px;
         }
 
-        .btn-secondary {
-            background-color: #f3f4f6;
-            color: #111 !important;
-            border: 1px solid #d1d5db;
+        .pill {
+            display: inline-block;
+            padding: 8px 10px;
+            border-radius: 999px;
+            font-weight: 800;
+            font-size: 12px;
+            letter-spacing: 0.2px;
+            border: 1px solid rgba(0, 63, 110, 0.18);
+            background: rgba(0, 63, 110, 0.06);
+            color: var(--hydro-blue);
+        }
+
+        .pill-buy {
+            border-color: rgba(0, 176, 225, 0.28);
+            background: rgba(0, 176, 225, 0.12);
+            color: var(--hydro-blue);
+        }
+
+        .pill-more {
+            border-color: rgba(0, 63, 110, 0.18);
+            background: rgba(0, 63, 110, 0.06);
+            color: var(--hydro-blue);
+        }
+
+        .pill-no {
+            border-color: rgba(228, 14, 32, 0.22);
+            background: rgba(228, 14, 32, 0.06);
+            color: rgb(140, 10, 20);
         }
 
         .footer {
-            margin-top: 48px;
+            padding: 16px 20px 20px;
+            border-top: 1px solid rgba(0, 63, 110, 0.12);
             font-size: 12px;
-            color: #999;
-            text-align: center;
+            color: var(--muted);
+        }
+
+        @media (max-width: 420px) {
+            .wrapper {
+                padding: 18px 10px;
+            }
+
+            .header,
+            .content,
+            .footer {
+                padding-left: 16px;
+                padding-right: 16px;
+            }
         }
     </style>
 </head>
 
 <body>
-    <div class="container">
-        <h1>Hola, {{ sales_rep_name }}</h1>
+    <div class="wrapper">
+        <div class="container">
+            <div class="top-accent"></div>
 
-        <p>El cliente ha respondido a el recordatorio relacionada con una cotización.</p>
+            <div class="header">
+                <!-- Logo -->
+                <img class="logo" src="logo_blue.png" alt="Hidrorey" />
+                <p class="subtitle">Notificación de respuesta</p>
+            </div>
 
-        <div class="quote-info">
-            <p><strong>Cotización:</strong> {{ quote_id }}</p>
-            <p><strong>Respuesta del cliente:</strong> {{ response }}</p>
-        </div>
+            <div class="content">
+                <h1>Hola, {{ sales_rep_name }}</h1>
 
-        <p>Te recomendamos dar seguimiento lo antes posible para continuar con el proceso.</p>
+                <p>
+                    El cliente respondió al recordatorio asociado a una cotización. Te recomendamos dar
+                    seguimiento lo antes posible para continuar con el proceso.
+                </p>
 
-        <div class="footer">
-            Este correo se generó automáticamente.<br />
-            Si necesitas ayuda, responde a este mensaje.
+                <div class="card">
+                    <p class="row">
+                        <span class="label">Cotización</span><br />
+                        {{ quote_id }}
+                    </p>
+
+                    <p class="row">
+                        <span class="label">Respuesta del cliente</span><br />
+                        <span
+                            class="pill
+                  {% if response == 'buy' %}pill-buy{% elif response == 'more_info' %}pill-more{% elif response == 'not_interested' %}pill-no{% endif %}">
+                            {{ response }}
+                        </span>
+                    </p>
+                </div>
+
+                <p style="margin-bottom: 0">
+                    Si necesitas contexto adicional, revisa el correo original del recordatorio o la
+                    transacción en el CRM.
+                </p>
+            </div>
+
+            <div class="footer">
+                Este correo se generó automáticamente.<br />
+                Si necesitas ayuda, responde a este mensaje.
+            </div>
         </div>
     </div>
 </body>
