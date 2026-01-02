@@ -2,6 +2,7 @@ import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as apigateway from "aws-cdk-lib/aws-apigateway";
 import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
 import * as cdk from "aws-cdk-lib";
+import * as iam from "aws-cdk-lib/aws-iam";
 import { Construct } from "constructs";
 import * as path from "path";
 
@@ -76,6 +77,17 @@ export default class ApiResponse extends Construct {
         throttlingBurstLimit: 60,
       },
     });
+
+    this.handler.addToRolePolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: ["ses:SendEmail", "ses:SendRawEmail"],
+        resources: [
+          "arn:aws:ses:us-west-1:183631317390:identity/hidrorey.info",
+          "arn:aws:ses:us-west-1:183631317390:configuration-set/my-first-configuration-set",
+        ],
+      })
+    );
 
     new cdk.CfnOutput(this, "ApiEndpointUrl", {
       value: this.api.url,

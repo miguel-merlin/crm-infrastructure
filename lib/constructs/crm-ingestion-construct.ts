@@ -90,6 +90,17 @@ export default class CrmIngestion extends Construct {
       new s3n.LambdaDestination(this.processor)
     );
 
+    this.processor.addToRolePolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: ["ses:SendEmail", "ses:SendRawEmail"],
+        resources: [
+          "arn:aws:ses:us-west-1:183631317390:identity/hidrorey.info",
+          "arn:aws:ses:us-west-1:183631317390:configuration-set/my-first-configuration-set",
+        ],
+      })
+    );
+
     new cdk.CfnOutput(this, "IngestionBucketName", {
       value: this.bucket.bucketName,
       description: "S3 bucket used for CRM ingestion uploads",

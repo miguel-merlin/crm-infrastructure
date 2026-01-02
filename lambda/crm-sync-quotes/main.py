@@ -23,7 +23,7 @@ SENDER = "SENDER_EMAIL"
 DOMANAIN = "DOMAIN"
 TEMPLATE_PATH = "assets/template.html"
 SALES_REPS_PATH = "assets/sales_rep.csv"
-EMAIL_CADENCE_DAYS = set([3, 5, 8])
+EMAIL_CADENCE_DAYS = set([11])
 ALLOW_LIST_PATH = "assets/allowlist.yaml"
 
 
