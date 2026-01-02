@@ -1,5 +1,6 @@
 import { Construct } from "constructs";
 import * as s3 from "aws-cdk-lib/aws-s3";
+import * as s3deploy from "aws-cdk-lib/aws-s3-deployment";
 import * as cloudfont from "aws-cdk-lib/aws-cloudfront";
 import * as origins from "aws-cdk-lib/aws-cloudfront-origins";
 import * as certificatemanager from "aws-cdk-lib/aws-certificatemanager";
@@ -108,6 +109,14 @@ export default class Website extends Construct {
       });
       domainARecord.node.addDependency(this.distribution);
     }
+
+    new s3deploy.BucketDeployment(this, `${props.bucketName}-deployment`, {
+      sources: [s3deploy.Source.asset("ui")],
+      destinationBucket: this.bucket,
+      destinationKeyPrefix: "",
+      distribution: this.distribution,
+      distributionPaths: ["/*"],
+    });
 
     new cdk.CfnOutput(this, "cloudfront-website-url", {
       value: this.distribution.distributionDomainName,

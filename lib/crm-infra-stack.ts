@@ -5,6 +5,7 @@ import Website from "./constructs/crm-web-construct";
 import { Construct } from "constructs";
 
 const DOMAIN = "hidrorey.info";
+const SUBDOMAIN = "www";
 export class CrmInfraStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
@@ -15,7 +16,7 @@ export class CrmInfraStack extends cdk.Stack {
       codePath: "./lambda/crm-sync-quotes",
       lambdaEnvVars: {
         SENDER_EMAIL: "contacto@" + DOMAIN,
-        DOMAIN: DOMAIN,
+        DOMAIN: "https://" + SUBDOMAIN + "." + DOMAIN,
       },
       globalSecondaryIndexes: [
         {
@@ -39,11 +40,12 @@ export class CrmInfraStack extends cdk.Stack {
       bucketName: "crm-landing-page-bucket",
       indexFile: "index.html",
       errorFile: "index.html",
-      // domainConfig: {
-      //   domainName: DOMAIN,
-      //   subdomainName: "www",
-      //   certificateArn: "arn:aws:acm:us-east-1:123456789012:certificate/your-certificate-id",
-      // },
+      domainConfig: {
+        domainName: DOMAIN,
+        subdomainName: "www",
+        certificateArn:
+          "arn:aws:acm:us-east-1:183631317390:certificate/b66da7de-bbc5-4968-bbe4-37fbe222b283",
+      },
     });
   }
 }
