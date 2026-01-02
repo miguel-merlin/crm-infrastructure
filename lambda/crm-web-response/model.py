@@ -47,7 +47,7 @@ class RequestParams:
         Supports base64-encoded bodies.
         Expected JSON:
           {
-            "id": "...",
+            "prospect_id": "...",
             "email_transaction_id": "...",
             "response": "Buy" | "More Info" | "Not Interested"
           }
@@ -65,7 +65,7 @@ class RequestParams:
         except (ValueError, UnicodeDecodeError):
             return None, "Request body must be valid JSON"
 
-        prospect_id = (payload.get("id") or "").strip()
+        prospect_id = (payload.get("prospect_id") or "").strip()
         email_transaction_id = (payload.get("email_transaction_id") or "").strip()
         response = (payload.get("response") or "").strip()
 
