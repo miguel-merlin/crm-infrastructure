@@ -54,7 +54,16 @@ export default class ApiResponse extends Construct {
     this.handler = new lambda.Function(this, "Handler", {
       runtime: lambda.Runtime.PYTHON_3_11,
       handler: "main.handler",
-      code: lambda.Code.fromAsset(codePath),
+      code: lambda.Code.fromAsset(codePath, {
+        bundling: {
+          image: lambda.Runtime.PYTHON_3_10.bundlingImage,
+          command: [
+            "bash",
+            "-c",
+            "pip install -r requirements.txt --platform manylinux2014_x86_64 --only-binary=:all: -t /asset-output && cp -au . /asset-output",
+          ],
+        },
+      }),
       environment: {
         TABLE_NAME: this.table.tableName,
         ENABLE_CORS: String(props.enableCors ?? true),
