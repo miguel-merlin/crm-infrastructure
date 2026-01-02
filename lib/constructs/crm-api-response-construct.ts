@@ -67,6 +67,7 @@ export default class ApiResponse extends Construct {
       environment: {
         TABLE_NAME: this.table.tableName,
         ENABLE_CORS: String(props.enableCors ?? true),
+        ...props.lambdaEnvVars,
       },
       timeout: cdk.Duration.seconds(10),
     });
