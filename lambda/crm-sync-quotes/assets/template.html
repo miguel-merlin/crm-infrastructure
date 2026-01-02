@@ -2,239 +2,109 @@
 <html lang="es">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <title>Recordatorio de Cotización | Hidrorey</title>
-    <style>
-        :root {
-            /* Hidrorey institutional palette */
-            --hydro-red: rgb(228, 14, 32);
-            --hydro-blue: rgb(0, 63, 110);
-            --hydro-cyan: rgb(0, 176, 225);
-
-            --ink: rgb(11, 31, 42);
-            --muted: rgba(11, 31, 42, 0.68);
-            --paper: #ffffff;
-            --wash: rgba(0, 176, 225, 0.08);
-            --line: rgba(0, 63, 110, 0.16);
-
-            --radius: 16px;
-        }
-
-        /* Email-safe resets */
-        html,
-        body {
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            font-family: "Futura Std", Futura, "Trebuchet MS", Arial, sans-serif;
-            line-height: 1.6;
-            color: var(--ink);
-            background: #f9fbfc;
-        }
-
-        .wrapper {
-            width: 100%;
-            padding: 24px 14px;
-            background: linear-gradient(180deg, #f9fbfc 0%, var(--wash) 100%);
-        }
-
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-            background: var(--paper);
-            border: 1px solid var(--line);
-            border-radius: var(--radius);
-            overflow: hidden;
-        }
-
-        .top-accent {
-            height: 6px;
-            background: linear-gradient(90deg,
-                    var(--hydro-red),
-                    var(--hydro-cyan),
-                    var(--hydro-blue));
-        }
-
-        .header {
-            padding: 18px 20px 8px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .logo {
-            height: 34px;
-            width: auto;
-            display: block;
-        }
-
-        .subtitle {
-            margin: 0;
-            font-size: 12px;
-            color: var(--muted);
-        }
-
-        .content {
-            padding: 8px 20px 20px;
-        }
-
-        h1 {
-            margin: 10px 0 10px;
-            font-size: 18px;
-            font-weight: 700;
-            color: var(--ink);
-        }
-
-        p {
-            margin: 0 0 14px;
-            font-size: 14px;
-            color: var(--ink);
-        }
-
-        .card {
-            margin: 14px 0 18px;
-            padding: 14px;
-            border-radius: 12px;
-            border: 1px solid var(--line);
-            background: rgba(0, 63, 110, 0.03);
-        }
-
-        .row {
-            margin: 0 0 8px;
-            font-size: 13px;
-            color: var(--ink);
-        }
-
-        .row:last-child {
-            margin-bottom: 0;
-        }
-
-        .label {
-            color: var(--hydro-blue);
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.4px;
-            font-size: 11px;
-        }
-
-        .actions {
-            margin-top: 10px;
-        }
-
-        .btn {
-            display: block;
-            width: 100%;
-            text-align: center;
-            text-decoration: none;
-            padding: 12px 14px;
-            border-radius: 999px;
-            font-weight: 800;
-            font-size: 14px;
-            letter-spacing: 0.2px;
-            box-sizing: border-box;
-        }
-
-        .btn+.btn {
-            margin-top: 10px;
-        }
-
-        .btn-primary {
-            background: var(--hydro-blue);
-            color: #ffffff !important;
-        }
-
-        .btn-secondary {
-            background: rgba(0, 176, 225, 0.12);
-            border: 1px solid rgba(0, 176, 225, 0.28);
-            color: var(--hydro-blue) !important;
-        }
-
-        .btn-link {
-            background: transparent;
-            color: rgba(11, 31, 42, 0.62) !important;
-            text-decoration: underline;
-            padding: 10px 0 0;
-            border-radius: 0;
-            font-weight: 700;
-        }
-
-        .footer {
-            padding: 16px 20px 20px;
-            border-top: 1px solid rgba(0, 63, 110, 0.12);
-            font-size: 12px;
-            color: var(--muted);
-        }
-
-        @media (max-width: 420px) {
-            .wrapper {
-                padding: 18px 10px;
-            }
-
-            .header,
-            .content,
-            .footer {
-                padding-left: 16px;
-                padding-right: 16px;
-            }
-        }
-    </style>
 </head>
 
-<body>
-    <div class="wrapper">
-        <div class="container">
-            <div class="top-accent"></div>
+<body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f9fbfc; color: #0b1f2a;">
+    <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #f9fbfc;">
+        <tr>
+            <td align="center" style="padding: 24px 14px;">
+                <table width="100%" border="0" cellspacing="0" cellpadding="0"
+                    style="max-width: 600px; background-color: #ffffff; border: 1px solid #dee5e9; border-radius: 16px; overflow: hidden; border-collapse: separate;">
+                    <tr>
+                        <td height="6"
+                            style="background: #e40e22; background: linear-gradient(90deg, #e40e22, #00b0e1, #003f6e);">
+                        </td>
+                    </tr>
 
-            <div class="header">
-                <img class="logo" src="logo_blue.png" alt="Hidrorey" />
-                <p class="subtitle">Recordatorio de cotización</p>
-            </div>
+                    <tr>
+                        <td style="padding: 20px 20px 10px 20px;">
+                            <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                <tr>
+                                    <td width="120">
+                                        <img src="https://www.hidrorey.info/assets/logo_blue.png" alt="Hidrorey"
+                                            width="120" style="display: block; border: 0;">
+                                    </td>
+                                    <td
+                                        style="padding-left: 15px; font-size: 12px; color: rgba(11, 31, 42, 0.68); vertical-align: middle;">
+                                        Recordatorio de cotización
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
 
-            <div class="content">
-                <h1>Hola, {{ prospect_name }}</h1>
+                    <tr>
+                        <td style="padding: 10px 20px 20px 20px;">
+                            <h1 style="margin: 0 0 15px 0; font-size: 18px; font-weight: bold; color: #0b1f2a;">Hola, {{
+                                prospect_name }}</h1>
+                            <p style="margin: 0 0 15px 0; font-size: 14px; line-height: 1.6; color: #0b1f2a;">
+                                Te recordamos que tienes una cotización pendiente que aún no ha sido confirmada.
+                            </p>
 
-                <p>
-                    Te recordamos que tienes una cotización pendiente que aún no ha sido confirmada.
-                </p>
+                            <div
+                                style="margin: 15px 0; padding: 15px; border-radius: 12px; border: 1px solid rgba(0, 63, 110, 0.16); background-color: #f4f7f9;">
+                                <p style="margin: 0 0 10px 0; font-size: 13px;">
+                                    <span
+                                        style="color: #003f6e; font-weight: bold; font-size: 11px; text-transform: uppercase;">Referencia</span><br>
+                                    {{ quote_id }}
+                                </p>
+                                <p style="margin: 0 0 10px 0; font-size: 13px;">
+                                    <span
+                                        style="color: #003f6e; font-weight: bold; font-size: 11px; text-transform: uppercase;">Monto</span><br>
+                                    ${{ amount }}
+                                </p>
+                                <p style="margin: 0; font-size: 13px;">
+                                    <span
+                                        style="color: #003f6e; font-weight: bold; font-size: 11px; text-transform: uppercase;">Fecha</span><br>
+                                    {{ created_at }}
+                                </p>
+                            </div>
 
-                <div class="card">
-                    <p class="row">
-                        <span class="label">Referencia</span><br />
-                        {{ quote_id }}
-                    </p>
-                    <p class="row">
-                        <span class="label">Monto</span><br />
-                        ${{ amount }}
-                    </p>
-                    <p class="row">
-                        <span class="label">Fecha</span><br />
-                        {{ created_at }}
-                    </p>
-                </div>
+                            <p style="margin: 15px 0; font-size: 14px;"><strong>¿Cómo deseas continuar?</strong></p>
 
-                <p><strong>¿Cómo deseas continuar?</strong></p>
+                            <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                <tr>
+                                    <td style="padding-bottom: 12px;">
+                                        <a href="{{ domain }}?transaction_id={{ transaction_id }}&response=buy&prospect_id={{ prospect_id }}"
+                                            style="background-color: #003f6e; color: #ffffff; padding: 12px 20px; text-decoration: none; border-radius: 25px; font-weight: bold; display: block; text-align: center; font-size: 14px;">
+                                            Quiero comprar
+                                        </a>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding-bottom: 12px;">
+                                        <a href="{{ domain }}?transaction_id={{ transaction_id }}&response=more_info&prospect_id={{ prospect_id }}"
+                                            style="background-color: #e5f5fa; border: 1px solid #00b0e1; color: #003f6e; padding: 12px 20px; text-decoration: none; border-radius: 25px; font-weight: bold; display: block; text-align: center; font-size: 14px;">
+                                            Hablar con un asesor
+                                        </a>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td align="center">
+                                        <a href="{{ domain }}?transaction_id={{ transaction_id }}&response=not_interested&prospect_id={{ prospect_id }}"
+                                            style="color: rgba(11, 31, 42, 0.62); text-decoration: underline; font-size: 12px; font-weight: bold;">
+                                            Ya no estoy interesado
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
 
-                <div class="actions">
-                    <a href="{{ domain }}?transaction_id={{ transaction_id }}&response=buy&prospect_id={{ prospect_id }}"
-                        class="btn btn-primary">Quiero comprar</a>
-
-                    <a href="{{ domain }}?transaction_id={{ transaction_id }}&response=more_info&prospect_id={{ prospect_id }}"
-                        class="btn btn-secondary">Hablar con un asesor</a>
-
-                    <a href="{{ domain }}?transaction_id={{ transaction_id }}&response=not_interested&prospect_id={{ prospect_id }}"
-                        class="btn btn-link">Ya no estoy interesado</a>
-                </div>
-            </div>
-
-            <div class="footer">
-                Si tienes alguna duda, responde a este correo.<br />
-                Gracias por confiar en nosotros.
-            </div>
-        </div>
-    </div>
+                    <tr>
+                        <td
+                            style="padding: 20px; border-top: 1px solid #eceff1; font-size: 12px; color: rgba(11, 31, 42, 0.68);">
+                            Si tienes alguna duda, responde a este correo.<br>
+                            Gracias por confiar en nosotros.
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
 </body>
 
 </html>
