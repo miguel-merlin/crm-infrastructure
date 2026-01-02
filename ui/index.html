@@ -2,190 +2,237 @@
 <html lang="es">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recordatorio | Hidrorey</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
-        rel="stylesheet">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <title>Confirmación de respuesta | Hidrorey</title>
+
     <style>
         :root {
-            --ink: #0b1f2a;
-            --deep: #0f3c4c;
-            --mist: #e8f2f4;
-            --sea: #2da7a1;
-            --sun: #f2c14e;
+            --hydro-red: rgb(228, 14, 32);
+            --hydro-blue: rgb(0, 63, 110);
+            --hydro-cyan: rgb(0, 176, 225);
+
+            --ink: rgb(11, 31, 42);
+            --muted: rgba(11, 31, 42, 0.68);
+            --line: rgba(0, 63, 110, 0.16);
             --paper: #ffffff;
-            --shadow: 0 30px 60px rgba(10, 27, 34, 0.18);
+            --wash: rgba(0, 176, 225, 0.08);
+
+            --shadow: 0 18px 40px rgba(11, 31, 42, 0.14);
+            --radius-xl: 22px;
+            --radius-lg: 16px;
+            --radius-md: 12px;
+
+            --max: 920px;
         }
 
         * {
             box-sizing: border-box;
         }
 
+        html,
+        body {
+            height: 100%;
+        }
+
         body {
             margin: 0;
-            font-family: "Plus Jakarta Sans", "Segoe UI", sans-serif;
             color: var(--ink);
-            background:
-                radial-gradient(circle at 10% 20%, rgba(45, 167, 161, 0.18), transparent 48%),
-                radial-gradient(circle at 90% 10%, rgba(242, 193, 78, 0.2), transparent 45%),
-                linear-gradient(120deg, #f9fbfc 0%, #eef6f7 60%, #e7f1f2 100%);
-            min-height: 100vh;
+            background: linear-gradient(180deg, #f9fbfc 0%, var(--wash) 100%);
+            font-family: "Futura Std", Futura, "Trebuchet MS", Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
         .page {
-            max-width: 1120px;
+            max-width: var(--max);
             margin: 0 auto;
-            padding: 36px 24px 72px;
+            padding: 28px 20px 64px;
         }
 
         .topbar {
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            gap: 24px;
-            margin-bottom: 48px;
+            justify-content: flex-start;
+            gap: 14px;
+            padding: 14px 16px;
+            background: var(--paper);
+            border: 1px solid var(--line);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 8px 20px rgba(11, 31, 42, 0.06);
         }
 
         .brand {
             display: flex;
             align-items: center;
             gap: 12px;
-            font-weight: 700;
-            letter-spacing: 0.6px;
-            text-transform: uppercase;
+            min-width: 0;
+        }
+
+        .brand-logo {
+            height: 42px;
+            width: auto;
+            display: block;
+            object-fit: contain;
         }
 
         .brand-mark {
             width: 44px;
             height: 44px;
-            border-radius: 16px 6px 16px 6px;
-            background: linear-gradient(135deg, var(--deep), var(--sea));
+            border-radius: 14px 6px 14px 6px;
+            background: linear-gradient(135deg, var(--hydro-blue), var(--hydro-cyan));
             display: grid;
             place-items: center;
             color: white;
-            font-size: 20px;
+            font-weight: 800;
+            letter-spacing: 0.6px;
+            user-select: none;
         }
 
-        .status-chip {
-            background: rgba(15, 60, 76, 0.12);
-            color: var(--deep);
-            padding: 8px 14px;
-            border-radius: 999px;
-            font-size: 13px;
-            font-weight: 600;
-        }
-
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 36px;
-        }
-
-        .hero h1 {
-            font-family: "Fraunces", "Times New Roman", serif;
-            font-weight: 700;
-            font-size: clamp(32px, 4vw, 44px);
+        .brand-name {
+            display: flex;
+            flex-direction: column;
             line-height: 1.1;
-            margin: 0 0 20px;
         }
 
-        .hero p {
-            font-size: 17px;
-            line-height: 1.7;
-            margin: 0 0 22px;
+        .brand-name span {
+            font-size: 12px;
+            color: var(--muted);
         }
 
-        .highlight {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            background: var(--mist);
-            color: var(--deep);
-            padding: 10px 16px;
-            border-radius: 999px;
-            font-size: 14px;
-            font-weight: 600;
+        .content {
+            margin-top: 22px;
+            display: grid;
+            gap: 18px;
         }
 
-        .quote-card {
+        .hero {
             background: var(--paper);
-            padding: 28px;
-            border-radius: 26px;
+            border: 1px solid var(--line);
+            border-radius: var(--radius-xl);
             box-shadow: var(--shadow);
-            position: relative;
             overflow: hidden;
         }
 
-        .quote-card::after {
+        .hero-header {
+            padding: 22px 22px 14px;
+            position: relative;
+        }
+
+        .hero-header::before {
             content: "";
             position: absolute;
-            inset: 0;
-            background: radial-gradient(circle at top right, rgba(45, 167, 161, 0.18), transparent 55%);
-            pointer-events: none;
+            inset: 0 0 auto 0;
+            height: 6px;
+            background: linear-gradient(90deg,
+                    var(--hydro-red),
+                    var(--hydro-cyan),
+                    var(--hydro-blue));
         }
 
-        .quote-header {
-            display: flex;
+        .kicker {
+            display: inline-flex;
             align-items: center;
-            justify-content: space-between;
-            margin-bottom: 18px;
-            gap: 12px;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: 999px;
+            background: rgba(0, 176, 225, 0.12);
+            color: var(--hydro-blue);
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 0.2px;
         }
 
-        .quote-title {
-            font-size: 18px;
-            font-weight: 700;
+        h1 {
+            margin: 14px 0 8px;
+            font-size: clamp(26px, 3vw, 36px);
+            line-height: 1.12;
+            letter-spacing: -0.2px;
+        }
+
+        .lead {
+            margin: 0;
+            color: var(--muted);
+            font-size: 15px;
+            line-height: 1.7;
+        }
+
+        .hero-body {
+            padding: 0 22px 22px;
+        }
+
+        .meta {
+            margin-top: 16px;
+            display: grid;
+            gap: 10px;
+        }
+
+        .meta-row {
+            display: flex;
+            gap: 10px;
+            align-items: baseline;
+            padding: 10px 12px;
+            border-radius: var(--radius-md);
+            background: rgba(0, 63, 110, 0.04);
+            border: 1px solid rgba(0, 63, 110, 0.12);
+        }
+
+        .meta-row b {
+            color: var(--hydro-blue);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            min-width: 130px;
+        }
+
+        .meta-row span {
+            font-size: 14px;
+            color: var(--ink);
+            word-break: break-word;
         }
 
         .response-message {
             margin: 16px 0 0;
-            padding: 16px;
-            border-radius: 16px;
-            background: rgba(45, 167, 161, 0.12);
-            color: var(--deep);
-            font-size: 15px;
-            line-height: 1.6;
+            padding: 14px;
+            border-radius: var(--radius-lg);
+            background: rgba(0, 176, 225, 0.12);
+            border: 1px solid rgba(0, 176, 225, 0.22);
+            color: rgb(0, 63, 110);
+            line-height: 1.65;
+            font-size: 14px;
         }
 
         .support {
-            margin-top: 24px;
-            background: rgba(45, 167, 161, 0.12);
-            border-radius: 16px;
-            padding: 16px;
-            font-size: 14px;
-            color: var(--deep);
+            margin-top: 14px;
+            padding: 14px;
+            border-radius: var(--radius-lg);
+            background: rgba(228, 14, 32, 0.06);
+            border: 1px solid rgba(228, 14, 32, 0.18);
+            color: var(--ink);
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .support b {
+            color: var(--hydro-red);
         }
 
         .footer {
-            margin-top: 40px;
-            font-size: 13px;
-            color: rgba(11, 31, 42, 0.6);
+            margin-top: 16px;
+            font-size: 12px;
+            color: var(--muted);
+            line-height: 1.6;
         }
 
         .fade-up {
             opacity: 0;
-            transform: translateY(14px);
-            animation: fadeUp 0.8s ease forwards;
+            transform: translateY(10px);
+            animation: fadeUp 0.6s ease forwards;
         }
 
         .delay-1 {
-            animation-delay: 0.1s;
-        }
-
-        .delay-2 {
-            animation-delay: 0.2s;
-        }
-
-        .delay-3 {
-            animation-delay: 0.3s;
-        }
-
-        .delay-4 {
-            animation-delay: 0.4s;
+            animation-delay: 0.08s;
         }
 
         @keyframes fadeUp {
@@ -195,40 +242,11 @@
             }
         }
 
-        @media (max-width: 900px) {
-            .grid {
-                grid-template-columns: 1fr;
-            }
-
-            .topbar {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-        }
-
-        @media (max-width: 600px) {
-            .page {
-                padding: 28px 18px 56px;
-            }
-
-            .quote-card {
-                padding: 22px;
-            }
-
-            .actions .btn {
-                width: 100%;
-            }
-        }
-
         @media (prefers-reduced-motion: reduce) {
             .fade-up {
                 animation: none;
                 opacity: 1;
                 transform: none;
-            }
-
-            .btn {
-                transition: none;
             }
         }
     </style>
@@ -236,82 +254,146 @@
 
 <body>
     <main class="page">
-        <div class="topbar fade-up">
-            <div class="brand">
-                <div class="brand-mark">H</div>
-                Hidrorey
-            </div>
-            <div class="status-chip">Seguimiento pendiente</div>
-        </div>
+        <header class="topbar fade-up">
+            <div class="brand" aria-label="Hidrorey">
+                <img class="brand-logo" src="assets/logo_blue.png" alt="Hidrorey"
+                    onerror="this.style.display='none'; document.getElementById('brand-fallback').style.display='grid';" />
+                <div id="brand-fallback" class="brand-mark" aria-hidden="true" style="display: none">
+                    H
+                </div>
 
-        <section class="grid">
-            <div class="hero">
-                <div class="highlight fade-up delay-1">
-                    Seguimos listos para ayudarte
-                </div>
-                <h1 class="fade-up delay-2">Hola! Espera una respuesta pronto!
-                </h1>
-                <p class="fade-up delay-3">
-                    Recibiste un recordatorio sobre tu cotización pendiente. Este espacio confirma la
-                    respuesta que elegiste en el correo.
-                </p>
-                <div class="footer fade-up delay-4">
-                    Si algo cambió o necesitas apoyo adicional, puedes responder al mismo correo.
+                <div class="brand-name">
+                    <span>Confirmación de seguimiento</span>
                 </div>
             </div>
+        </header>
+
+        <section class="content" aria-label="Confirmación">
+            <article class="hero fade-up delay-1">
+                <div class="hero-header">
+                    <div class="kicker">Gracias por tu respuesta</div>
+                    <h1 id="page-title">Hemos recibido tu confirmación</h1>
+                    <p class="lead">
+                        Este sitio confirma la respuesta que seleccionaste desde el correo de
+                        seguimiento de tu cotización.
+                    </p>
+                </div>
+
+                <div class="hero-body">
+                    <div class="meta" aria-label="Detalles">
+                        <div class="meta-row">
+                            <b>ID de transacción</b>
+                            <span id="quote-id">—</span>
+                        </div>
+                        <div class="meta-row">
+                            <b>Respuesta</b>
+                            <span id="response-label">—</span>
+                        </div>
+                    </div>
+
+                    <p class="response-message" id="response-message">
+                        Recibimos tu respuesta. En breve te confirmaremos los siguientes pasos.
+                    </p>
+
+                    <div class="support" role="note">
+                        <b>Importante:</b> Si tu solicitud requiere ajustes (productos, cantidades,
+                        envío o facturación), responde al correo original para que un asesor te apoye.
+                    </div>
+
+                    <div class="footer">
+                        Si algo cambió o necesitas apoyo adicional, puedes responder al mismo correo.
+                    </div>
+                </div>
+            </article>
         </section>
     </main>
 
     <script>
+        const API_GATEWAY_URL =
+            "https://6k6vkt58o8.execute-api.us-west-1.amazonaws.com/prod";
+
         const setText = (id, value) => {
             const node = document.getElementById(id);
-            if (node && value !== undefined && value !== null) {
+            if (
+                node &&
+                value !== undefined &&
+                value !== null &&
+                String(value).trim() !== ""
+            ) {
                 node.textContent = value;
             }
         };
 
-        const API_GATEWAY_URL = "https://6k6vkt58o8.execute-api.us-west-1.amazonaws.com/prod/";
+        const normalizeResponse = (raw) => {
+            const v = String(raw || "").trim().toLowerCase();
+            if (v === "buy" || v === "more_info" || v === "not_interested") return v;
+            return "";
+        };
 
-        const postResponse = ({ email_transaction_id, response, prospect_id }) => {
-            fetch(`${API_GATEWAY_URL}/response`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ email_transaction_id, response, prospect_id }),
-                keepalive: true,
-            }).catch(() => {
-                // Best-effort tracking; no UI changes needed.
-            });
+        const responseLabel = (response) => {
+            const labels = {
+                buy: "Quiero comprar",
+                more_info: "Necesito más información",
+                not_interested: "No estoy interesado(a)",
+            };
+            return labels[response] || "Respuesta recibida";
+        };
+
+        const responseMessage = (response) => {
+            const map = {
+                buy: "Gracias por confirmar tu interés en continuar. Ya estamos gestionando el siguiente paso.",
+                more_info:
+                    "Gracias por pedir más información. Un asesor te contactará con los detalles.",
+                not_interested:
+                    "Gracias por avisarnos. Cerraremos el seguimiento asociado a tu recordatorio.",
+            };
+            return (
+                map[response] ||
+                "Recibimos tu respuesta. En breve te confirmaremos los siguientes pasos."
+            );
+        };
+
+        const postResponse = async ({
+            email_transaction_id,
+            response,
+            prospect_id,
+        }) => {
+            try {
+                await fetch(`${API_GATEWAY_URL}/response`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email_transaction_id, response, prospect_id }),
+                    keepalive: true,
+                });
+            } catch {
+                // silent
+            }
         };
 
         document.addEventListener("DOMContentLoaded", () => {
             const params = new URLSearchParams(window.location.search);
-            const transactionId = params.get("transaction_id") || "";
-            const response = params.get("response") || "";
-            const prospectId = params.get("prospect_id") || "";
-            const responseMessage = document.getElementById("response-message");
+
+            const transactionId = (params.get("transaction_id") || "").trim();
+            const prospectId = (params.get("prospect_id") || "").trim();
+            const response = normalizeResponse(params.get("response"));
+
+            setText("quote-id", transactionId || "—");
+            setText("response-label", responseLabel(response));
+
+            const msgNode = document.getElementById("response-message");
+            if (msgNode) msgNode.textContent = responseMessage(response);
+            if (!transactionId || !response) {
+                const title = document.getElementById("page-title");
+                if (title) title.textContent = "Hemos recibido tu visita";
+            }
 
             if (transactionId) {
-                setText("quote-id", transactionId);
+                postResponse({
+                    email_transaction_id: transactionId,
+                    response,
+                    prospect_id: prospectId,
+                });
             }
-
-            if (responseMessage) {
-                const messageMap = {
-                    buy: "Gracias por confirmar tu interés en continuar. Ya estamos gestionando el siguiente paso.",
-                    more_info: "Gracias por pedir más información. Un asesor te contactará con los detalles.",
-                    not_interested: "Gracias por avisarnos. Cerraremos el seguimiento asociado a tu recordatorio.",
-                };
-                responseMessage.textContent =
-                    messageMap[response] ||
-                    "Recibimos tu respuesta. En breve te confirmaremos los siguientes pasos.";
-            }
-
-            postResponse({
-                email_transaction_id: transactionId,
-                response,
-
-            });
         });
     </script>
 </body>
