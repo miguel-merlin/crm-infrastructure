@@ -2,121 +2,237 @@
 <html lang="es">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recordatorio de Cotización</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>Recordatorio de Cotización | Hidrorey</title>
     <style>
+        :root {
+            /* Hidrorey institutional palette */
+            --hydro-red: rgb(228, 14, 32);
+            --hydro-blue: rgb(0, 63, 110);
+            --hydro-cyan: rgb(0, 176, 225);
+
+            --ink: rgb(11, 31, 42);
+            --muted: rgba(11, 31, 42, 0.68);
+            --paper: #ffffff;
+            --wash: rgba(0, 176, 225, 0.08);
+            --line: rgba(0, 63, 110, 0.16);
+
+            --radius: 16px;
+        }
+
+        /* Email-safe resets */
+        html,
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            line-height: 1.6;
-            color: #333;
             margin: 0;
             padding: 0;
-            background-color: #f9f9f9;
+        }
+
+        body {
+            font-family: "Futura Std", Futura, "Trebuchet MS", Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--ink);
+            background: #f9fbfc;
+        }
+
+        .wrapper {
+            width: 100%;
+            padding: 24px 14px;
+            background: linear-gradient(180deg, #f9fbfc 0%, var(--wash) 100%);
         }
 
         .container {
             max-width: 600px;
-            margin: 20px auto;
-            padding: 40px;
-            background-color: #ffffff;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            margin: 0 auto;
+            background: var(--paper);
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+
+        .top-accent {
+            height: 6px;
+            background: linear-gradient(90deg,
+                    var(--hydro-red),
+                    var(--hydro-cyan),
+                    var(--hydro-blue));
+        }
+
+        .header {
+            padding: 18px 20px 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo {
+            height: 34px;
+            width: auto;
+            display: block;
+        }
+
+        .subtitle {
+            margin: 0;
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        .content {
+            padding: 8px 20px 20px;
         }
 
         h1 {
-            font-size: 20px;
-            font-weight: 600;
-            margin-bottom: 24px;
-            color: #111;
+            margin: 10px 0 10px;
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--ink);
         }
 
         p {
-            margin-bottom: 16px;
-            font-size: 16px;
+            margin: 0 0 14px;
+            font-size: 14px;
+            color: var(--ink);
         }
 
-        .quote-info {
-            border-left: 4px solid #e5e7eb;
-            padding-left: 16px;
-            margin: 24px 0;
-            color: #666;
+        .card {
+            margin: 14px 0 18px;
+            padding: 14px;
+            border-radius: 12px;
+            border: 1px solid var(--line);
+            background: rgba(0, 63, 110, 0.03);
+        }
+
+        .row {
+            margin: 0 0 8px;
+            font-size: 13px;
+            color: var(--ink);
+        }
+
+        .row:last-child {
+            margin-bottom: 0;
+        }
+
+        .label {
+            color: var(--hydro-blue);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            font-size: 11px;
         }
 
         .actions {
-            margin-top: 32px;
+            margin-top: 10px;
         }
 
         .btn {
             display: block;
             width: 100%;
-            max-width: 250px;
-            margin-bottom: 12px;
-            padding: 12px 20px;
             text-align: center;
             text-decoration: none;
-            border-radius: 6px;
-            font-weight: 500;
-            font-size: 16px;
-        }
-
-        .btn-buy {
-            background-color: #000;
-            color: #fff !important;
-        }
-
-        .btn-talk {
-            background-color: #f3f4f6;
-            color: #111 !important;
-            border: 1px solid #d1d5db;
-        }
-
-        .btn-cancel {
-            background-color: transparent;
-            color: #9ca3af !important;
+            padding: 12px 14px;
+            border-radius: 999px;
+            font-weight: 800;
             font-size: 14px;
+            letter-spacing: 0.2px;
+            box-sizing: border-box;
+        }
+
+        .btn+.btn {
+            margin-top: 10px;
+        }
+
+        .btn-primary {
+            background: var(--hydro-blue);
+            color: #ffffff !important;
+        }
+
+        .btn-secondary {
+            background: rgba(0, 176, 225, 0.12);
+            border: 1px solid rgba(0, 176, 225, 0.28);
+            color: var(--hydro-blue) !important;
+        }
+
+        .btn-link {
+            background: transparent;
+            color: rgba(11, 31, 42, 0.62) !important;
             text-decoration: underline;
+            padding: 10px 0 0;
+            border-radius: 0;
+            font-weight: 700;
         }
 
         .footer {
-            margin-top: 48px;
+            padding: 16px 20px 20px;
+            border-top: 1px solid rgba(0, 63, 110, 0.12);
             font-size: 12px;
-            color: #999;
-            text-align: center;
+            color: var(--muted);
+        }
+
+        @media (max-width: 420px) {
+            .wrapper {
+                padding: 18px 10px;
+            }
+
+            .header,
+            .content,
+            .footer {
+                padding-left: 16px;
+                padding-right: 16px;
+            }
         }
     </style>
 </head>
 
 <body>
-    <div class="container">
-        <h1>Hola, {{ prospect_name }}</h1>
-        <p>Te recordamos que tienes una cotización pendiente que aún no ha sido confirmada.</p>
+    <div class="wrapper">
+        <div class="container">
+            <div class="top-accent"></div>
 
-        <div class="quote-info">
-            <p><strong>Referencia:</strong> {{ quote_id }}</p>
-            <p><strong>Monto:</strong> ${{ amount }}</p>
-            <p><strong>Fecha:</strong> {{ created_at }}</p>
-        </div>
+            <div class="header">
+                <img class="logo" src="logo_blue.png" alt="Hidrorey" />
+                <p class="subtitle">Recordatorio de cotización</p>
+            </div>
 
-        <p>¿Cómo deseas continuar?</p>
+            <div class="content">
+                <h1>Hola, {{ prospect_name }}</h1>
 
-        <div class="actions">
-            <a href="{{ domain }}/transaction_id={{ transaction_id }}&response=buy&prospect_id={{ prospect_id }}"
-                class="btn btn-buy">Quiero
-                Comprar</a>
-            <a href="{{ domain }}/transaction_id={{ transaction_id }}&response=more_info&prospect_id={{ prospect_id }}"
-                class="btn btn-talk">Hablar
-                con un
-                Asesor</a>
-            <a href="{{ domain }}/transaction_id={{ transaction_id }}&response=not_interested&prospect_id={{ prospect_id }}"
-                class="btn btn-cancel">Ya
-                NO estoy
-                interesado</a>
-        </div>
+                <p>
+                    Te recordamos que tienes una cotización pendiente que aún no ha sido confirmada.
+                </p>
 
-        <div class="footer">
-            Si tienes alguna duda, responde a este correo.<br>
-            Gracias por confiar en nosotros.
+                <div class="card">
+                    <p class="row">
+                        <span class="label">Referencia</span><br />
+                        {{ quote_id }}
+                    </p>
+                    <p class="row">
+                        <span class="label">Monto</span><br />
+                        ${{ amount }}
+                    </p>
+                    <p class="row">
+                        <span class="label">Fecha</span><br />
+                        {{ created_at }}
+                    </p>
+                </div>
+
+                <p><strong>¿Cómo deseas continuar?</strong></p>
+
+                <div class="actions">
+                    <a href="{{ domain }}?transaction_id={{ transaction_id }}&response=buy&prospect_id={{ prospect_id }}"
+                        class="btn btn-primary">Quiero comprar</a>
+
+                    <a href="{{ domain }}?transaction_id={{ transaction_id }}&response=more_info&prospect_id={{ prospect_id }}"
+                        class="btn btn-secondary">Hablar con un asesor</a>
+
+                    <a href="{{ domain }}?transaction_id={{ transaction_id }}&response=not_interested&prospect_id={{ prospect_id }}"
+                        class="btn btn-link">Ya no estoy interesado</a>
+                </div>
+            </div>
+
+            <div class="footer">
+                Si tienes alguna duda, responde a este correo.<br />
+                Gracias por confiar en nosotros.
+            </div>
         </div>
     </div>
 </body>
