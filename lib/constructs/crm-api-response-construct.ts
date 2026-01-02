@@ -72,7 +72,7 @@ export default class ApiResponse extends Construct {
       timeout: cdk.Duration.seconds(10),
     });
 
-    this.table.grantWriteData(this.handler);
+    this.table.grantReadWriteData(this.handler);
 
     this.api = new apigateway.LambdaRestApi(this, "Api", {
       handler: this.handler,
