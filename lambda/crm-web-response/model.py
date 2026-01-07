@@ -133,7 +133,7 @@ class SalesRep:
         if not isinstance(d, dict):
             return None, "sales_rep must be an object"
 
-        rep_id = (d.get("id") or "").strip()
+        rep_id = (d.get("sales_rep_id") or "").strip()
         name = (d.get("name") or "").strip()
         email = (d.get("email") or "").strip()
         phone = (d.get("phone_number") or "").strip()
@@ -143,7 +143,7 @@ class SalesRep:
         missing = [
             k
             for k, v in [
-                ("id", rep_id),
+                ("sales_rep_id", rep_id),
                 ("name", name),
                 ("email", email),
                 ("phone_number", phone),
