@@ -1,5 +1,5 @@
 from model import Quote, CustomerType
-from typing import List, Set, Tuple
+from typing import List, Set
 from datetime import datetime
 import yaml
 import logging
@@ -42,28 +42,43 @@ class QuoteFilter:
             return set(), set()
 
     def filter_quotes(self) -> List[Quote]:
-        """Filter quotes based on cadence + allowlist by customer type."""
+        """Filter quotes based on cadence + allowlist by customer type.
+
+        Rule change:
+        - If prospect allowlist is empty (missing/empty YAML), allow *all* prospects.
+        - Customers (CLIENT) still require allowlist match.
+        """
         filtered_quotes: List[Quote] = []
         now = datetime.now()
+
+        # If YAML had no prospect_ids (or file missing/invalid), allow all prospects.
+        prospect_allow_all = len(self.prospect_allowlist) == 0
 
         for quote in self.quotes:
             days_since_creation = (now - datetime.fromisoformat(quote.created_at)).days
             if days_since_creation not in self.email_cadence_config:
                 continue
+
             if quote.customer_type == CustomerType.PROSPECT:
-                if quote.prospect.id not in self.prospect_allowlist:
+                if (
+                    not prospect_allow_all
+                    and quote.prospect.id not in self.prospect_allowlist
+                ):
                     continue
+
             elif quote.customer_type == CustomerType.CLIENT:
                 if quote.prospect.id not in self.customer_allowlist:
                     continue
+
             else:
                 continue
 
             logger.info(
-                "Allowed quote=%s customer_type=%s prospect_id=%s",
+                "Allowed quote=%s customer_type=%s prospect_id=%s (prospect_allow_all=%s)",
                 quote.id,
                 quote.customer_type.value,
                 quote.prospect.id,
+                prospect_allow_all,
             )
             filtered_quotes.append(quote)
 
