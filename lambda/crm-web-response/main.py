@@ -60,12 +60,23 @@ def _summarize_event(event: Dict[str, Any]) -> Dict[str, Any]:
             redacted_headers[k] = s[:256] + ("…" if len(s) > 256 else "")
 
     body = event.get("body")
-    body_len = len(body) if isinstance(body, str) else (len(json.dumps(body)) if body is not None else 0)
+    body_len = (
+        len(body)
+        if isinstance(body, str)
+        else (len(json.dumps(body)) if body is not None else 0)
+    )
 
     return {
-        "shape": "apigw_v2" if "requestContext" in event and "http" in (event.get("requestContext") or {}) else "apigw_v1_like",
-        "httpMethod": event.get("httpMethod") or ((event.get("requestContext") or {}).get("http") or {}).get("method"),
-        "path": event.get("path") or ((event.get("requestContext") or {}).get("http") or {}).get("path"),
+        "shape": (
+            "apigw_v2"
+            if "requestContext" in event
+            and "http" in (event.get("requestContext") or {})
+            else "apigw_v1_like"
+        ),
+        "httpMethod": event.get("httpMethod")
+        or ((event.get("requestContext") or {}).get("http") or {}).get("method"),
+        "path": event.get("path")
+        or ((event.get("requestContext") or {}).get("http") or {}).get("path"),
         "queryStringParameters": event.get("queryStringParameters"),
         "isBase64Encoded": event.get("isBase64Encoded"),
         "headers": redacted_headers,
@@ -79,11 +90,14 @@ def _timed() -> float:
 
 TABLE_NAME = safe_get_env("TABLE_NAME")
 EMAIL_TRANSACTION_TABLE_NAME = safe_get_env("EMAIL_TRANSACTION_TABLE_NAME")
+OPT_OUT_TABLE_NAME = safe_get_env("OPT_OUT_TABLE_NAME")
 ENABLE_CORS = safe_get_env("ENABLE_CORS").lower() == "true"
 
 dynamodb = boto3.resource("dynamodb")
 table = dynamodb.Table(TABLE_NAME)
 email_transaction_table = dynamodb.Table(EMAIL_TRANSACTION_TABLE_NAME)
+opt_out_table = dynamodb.Table(OPT_OUT_TABLE_NAME)
+
 
 def create_response(
     status_code: int, body: Dict[str, Any], headers: Optional[Dict[str, str]] = None
@@ -109,14 +123,18 @@ def create_response(
     }
 
 
-def save_to_dynamodb(record: ResponseRecord, ctx: Dict[str, Any]) -> Tuple[bool, Optional[str]]:
+def save_to_dynamodb(
+    record: ResponseRecord, ctx: Dict[str, Any]
+) -> Tuple[bool, Optional[str]]:
     t0 = _timed()
     try:
         table.put_item(
             Item=record.to_dict(),
             ConditionExpression="attribute_not_exists(email_transaction_id)",
         )
-        _json_log("INFO", "dynamodb_put_ok", ctx=ctx, ms=round((_timed() - t0) * 1000, 2))
+        _json_log(
+            "INFO", "dynamodb_put_ok", ctx=ctx, ms=round((_timed() - t0) * 1000, 2)
+        )
         return True, None
 
     except ClientError as e:
@@ -136,10 +154,18 @@ def save_to_dynamodb(record: ResponseRecord, ctx: Dict[str, Any]) -> Tuple[bool,
         if code == "ConditionalCheckFailedException":
             return True, "Record already exists"  # idempotent case
 
-        return False, f"DynamoDB error ({code or 'UnknownCode'}): {message or 'No message'}"
+        return (
+            False,
+            f"DynamoDB error ({code or 'UnknownCode'}): {message or 'No message'}",
+        )
 
     except Exception:
-        _json_log("ERROR", "dynamodb_put_exception", ctx=ctx, ms=round((_timed() - t0) * 1000, 2))
+        _json_log(
+            "ERROR",
+            "dynamodb_put_exception",
+            ctx=ctx,
+            ms=round((_timed() - t0) * 1000, 2),
+        )
         logger.exception("dynamodb_put_exception_trace")  # stack trace
         return False, "Unexpected error writing to DynamoDB"
 
@@ -149,7 +175,9 @@ def get_email_transaction_by_id(
 ) -> Tuple[Optional[EmailTransaction], Optional[str]]:
     t0 = _timed()
     try:
-        resp = email_transaction_table.get_item(Key={"transaction_id": transaction_id.strip()})
+        resp = email_transaction_table.get_item(
+            Key={"transaction_id": transaction_id.strip()}
+        )
         item = resp.get("Item")
 
         _json_log(
@@ -183,9 +211,42 @@ def get_email_transaction_by_id(
         return None, f"DynamoDB error ({err.get('Code')}): {err.get('Message')}"
 
     except Exception:
-        _json_log("ERROR", "dynamodb_get_exception", ctx=ctx, ms=round((_timed() - t0) * 1000, 2))
+        _json_log(
+            "ERROR",
+            "dynamodb_get_exception",
+            ctx=ctx,
+            ms=round((_timed() - t0) * 1000, 2),
+        )
         logger.exception("dynamodb_get_exception_trace")
         return None, "Unexpected error reading from DynamoDB"
+
+
+def save_opt_out(quote_id: str, ctx: Dict[str, Any]) -> Tuple[bool, Optional[str]]:
+    """Record that the user is no longer interested in this specific quote."""
+    t0 = _timed()
+    try:
+        opt_out_table.put_item(
+            Item={
+                "quote_id": quote_id,
+                "opted_out_at": _now_iso(),
+            }
+        )
+        _json_log(
+            "INFO",
+            "dynamodb_opt_out_ok",
+            ctx=ctx,
+            quote_id=quote_id,
+            ms=round((_timed() - t0) * 1000, 2),
+        )
+        return True, None
+    except ClientError as e:
+        _json_log("ERROR", "dynamodb_opt_out_exception", ctx=ctx, quote_id=quote_id)
+        logger.exception("dynamodb_opt_out_exception_trace")
+        return False, f"DynamoDB ClientError: {str(e)}"
+    except Exception:
+        _json_log("ERROR", "dynamodb_opt_out_exception", ctx=ctx, quote_id=quote_id)
+        logger.exception("dynamodb_opt_out_exception_trace")
+        return False, "Unexpected error writing to DynamoDB"
 
 
 def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
@@ -201,7 +262,9 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
 
     try:
         # Support both API Gateway v1 and v2 method detection
-        http_method = event.get("httpMethod") or ((event.get("requestContext") or {}).get("http") or {}).get("method")
+        http_method = event.get("httpMethod") or (
+            (event.get("requestContext") or {}).get("http") or {}
+        ).get("method")
 
         if http_method == "OPTIONS":
             _json_log("INFO", "return_options_ok", ctx=ctx)
@@ -211,16 +274,23 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             _json_log("INFO", "return_method_not_allowed", ctx=ctx, method=http_method)
             return create_response(
                 405,
-                {"error": "Method not allowed", "message": "Only POST method is supported"},
+                {
+                    "error": "Method not allowed",
+                    "message": "Only POST method is supported",
+                },
             )
 
         params, error_message = RequestParams.from_event(event)
         if error_message:
             _json_log("INFO", "return_invalid_request", ctx=ctx, reason=error_message)
-            return create_response(400, {"error": "Invalid request", "message": error_message})
+            return create_response(
+                400, {"error": "Invalid request", "message": error_message}
+            )
         if not params:
             _json_log("INFO", "return_invalid_request", ctx=ctx, reason="Unknown error")
-            return create_response(400, {"error": "Invalid request", "message": "Unknown error"})
+            return create_response(
+                400, {"error": "Invalid request", "message": "Unknown error"}
+            )
 
         _json_log(
             "INFO",
@@ -233,8 +303,15 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
 
         response_type = ResponseType.from_string(params.response)
         if response_type is None:
-            _json_log("INFO", "return_invalid_response_type", ctx=ctx, response=params.response)
-            return create_response(400, {"error": "Invalid request", "message": "Invalid response type"})
+            _json_log(
+                "INFO",
+                "return_invalid_response_type",
+                ctx=ctx,
+                response=params.response,
+            )
+            return create_response(
+                400, {"error": "Invalid request", "message": "Invalid response type"}
+            )
 
         record = ResponseRecord(
             response_id=str(uuid.uuid4()),
@@ -249,7 +326,10 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             _json_log("ERROR", "return_save_failed", ctx=ctx, error=err)
             return create_response(
                 500,
-                {"error": "Internal server error", "message": "Failed to save response record"},
+                {
+                    "error": "Internal server error",
+                    "message": "Failed to save response record",
+                },
             )
         if err:  # idempotent note
             _json_log("INFO", "idempotent_write", ctx=ctx, note=err)
@@ -259,9 +339,23 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             _json_log("ERROR", "return_email_txn_fetch_failed", ctx=ctx, error=err)
             return create_response(
                 500,
-                {"error": "Internal server error", "message": "Failed to retrieve email transaction"},
+                {
+                    "error": "Internal server error",
+                    "message": "Failed to retrieve email transaction",
+                },
             )
 
+        if response_type == ResponseType.NOT_INTERESTED:
+            ok, err = save_opt_out(email_txn.quote_id, ctx)
+            if not ok:
+                _json_log("ERROR", "opt_out_save_failed", ctx=ctx, error=err)
+            else:
+                _json_log(
+                    "INFO",
+                    "opt_out_saved",
+                    ctx=ctx,
+                    quote_id=email_txn.quote_id,
+                )
         _json_log(
             "INFO",
             "email_txn_loaded",
@@ -277,9 +371,16 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         t0 = _timed()
         try:
             email_sender.send_emails(record, email_txn)
-            _json_log("INFO", "ses_send_ok", ctx=ctx, ms=round((_timed() - t0) * 1000, 2))
+            _json_log(
+                "INFO", "ses_send_ok", ctx=ctx, ms=round((_timed() - t0) * 1000, 2)
+            )
         except Exception:
-            _json_log("ERROR", "ses_send_exception", ctx=ctx, ms=round((_timed() - t0) * 1000, 2))
+            _json_log(
+                "ERROR",
+                "ses_send_exception",
+                ctx=ctx,
+                ms=round((_timed() - t0) * 1000, 2),
+            )
             logger.exception("ses_send_exception_trace")
 
         resp = create_response(
@@ -295,10 +396,22 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             },
         )
 
-        _json_log("INFO", "invocation_success", ctx=ctx, total_ms=round((_timed() - start) * 1000, 2))
+        _json_log(
+            "INFO",
+            "invocation_success",
+            ctx=ctx,
+            total_ms=round((_timed() - start) * 1000, 2),
+        )
         return resp
 
     except Exception:
-        _json_log("ERROR", "invocation_unhandled_exception", ctx=ctx, total_ms=round((_timed() - start) * 1000, 2))
+        _json_log(
+            "ERROR",
+            "invocation_unhandled_exception",
+            ctx=ctx,
+            total_ms=round((_timed() - start) * 1000, 2),
+        )
         logger.exception("invocation_unhandled_exception_trace")
-        return create_response(500, {"error": "Internal server error", "message": "Unhandled exception"})
+        return create_response(
+            500, {"error": "Internal server error", "message": "Unhandled exception"}
+        )
