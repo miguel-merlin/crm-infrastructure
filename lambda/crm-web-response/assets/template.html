@@ -86,25 +86,25 @@
                                             </span><br />
 
                                             {# Pill styling (inline, state-based) #}
-                                            {% if response == 'buy' %}
+                                            {% if response_key == 'buy' %}
                                             <span
                                                 style="display:inline-block; padding:8px 10px; border-radius:999px; font-weight:bold; font-size:12px; letter-spacing:0.2px; border:1px solid rgba(0,176,225,0.28); background-color:rgba(0,176,225,0.12); color:#003f6e;">
-                                                {{ response }}
+                                                {{ response_label }}
                                             </span>
-                                            {% elif response == 'more_info' %}
+                                            {% elif response_key == 'more_info' %}
                                             <span
                                                 style="display:inline-block; padding:8px 10px; border-radius:999px; font-weight:bold; font-size:12px; letter-spacing:0.2px; border:1px solid rgba(0,63,110,0.18); background-color:rgba(0,63,110,0.06); color:#003f6e;">
-                                                {{ response }}
+                                                {{ response_label }}
                                             </span>
-                                            {% elif response == 'not_interested' %}
+                                            {% elif response_key == 'not_interested' %}
                                             <span
                                                 style="display:inline-block; padding:8px 10px; border-radius:999px; font-weight:bold; font-size:12px; letter-spacing:0.2px; border:1px solid rgba(228,14,32,0.22); background-color:rgba(228,14,32,0.06); color:#8c0a14;">
-                                                {{ response }}
+                                                {{ response_label }}
                                             </span>
                                             {% else %}
                                             <span
                                                 style="display:inline-block; padding:8px 10px; border-radius:999px; font-weight:bold; font-size:12px; letter-spacing:0.2px; border:1px solid rgba(0,63,110,0.18); background-color:rgba(0,63,110,0.06); color:#003f6e;">
-                                                {{ response }}
+                                                {{ response_label }}
                                             </span>
                                             {% endif %}
                                         </p>

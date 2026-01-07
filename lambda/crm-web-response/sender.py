@@ -1,10 +1,23 @@
 import boto3
-from model import EmailTransaction, ResponseRecord
+from typing import Tuple
+from model import EmailTransaction, ResponseRecord, ResponseType
 from jinja2 import Template
 import logging
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
+
+RESPONSE_LABELS = {
+    ResponseType.BUY: "CLIENTE QUIERE COMPRAR",
+    ResponseType.MORE_INFO: "CLIENTE QUIERE MÁS INFORMACIÓN",
+    ResponseType.NOT_INTERESTED: "CLIENTE NO ESTÁ INTERESADO",
+}
+
+RESPONSE_KEYS = {
+    ResponseType.BUY: "buy",
+    ResponseType.MORE_INFO: "more_info",
+    ResponseType.NOT_INTERESTED: "not_interested",
+}
 
 
 class ResponseEmailSender:
@@ -22,6 +35,17 @@ class ResponseEmailSender:
         except Exception as e:
             raise ValueError(f"Error reading email template: {str(e)}") from e
 
+    def _normalize_response(self, raw: str) -> Tuple[str, str]:
+        """
+        Returns (response_key, response_label)
+        """
+        rt = ResponseType.from_string(raw)
+        if not rt:
+            # fallback
+            return "unknown", (raw or "RESPUESTA NO RECONOCIDA").upper()
+
+        return RESPONSE_KEYS[rt], RESPONSE_LABELS[rt]
+
     def _render_template(
         self, response_record: ResponseRecord, email_transaction: EmailTransaction
     ) -> str:
@@ -30,10 +54,14 @@ class ResponseEmailSender:
             raise ValueError(
                 "EmailTransaction must have a SalesRep to render template."
             )
+        response_key, response_label = self._normalize_response(
+            response_record.response_type
+        )
         return self.template.render(
             sales_rep_name=email_transaction.sales_rep.name,
             quote_id=response_record.email_transaction_id,
-            response=response_record.response_type,
+            response_key=response_key,
+            response_label=response_label,
         )
 
     def send_emails(
