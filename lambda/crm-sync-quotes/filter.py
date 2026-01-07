@@ -3,6 +3,8 @@ from typing import List, Set
 from datetime import datetime
 import yaml
 import logging
+from mypy_boto3_dynamodb.service_resource import Table
+from botocore.exceptions import ClientError
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -10,13 +12,18 @@ logger.setLevel(logging.INFO)
 
 class QuoteFilter:
     def __init__(
-        self, quotes: List[Quote], email_cadence_config: Set[int], allowlist_path: str
+        self,
+        quotes: List[Quote],
+        email_cadence_config: Set[int],
+        allowlist_path: str,
+        opt_out_table: Table,
     ) -> None:
         self.quotes = quotes
         self.email_cadence_config = email_cadence_config
         self.prospect_allowlist, self.customer_allowlist = self._parse_allowlist(
             allowlist_path
         )
+        self.opt_out_table = opt_out_table
 
     def _parse_allowlist(self, allow_list_path: str) -> tuple[set[str], set[str]]:
         try:
@@ -40,6 +47,23 @@ class QuoteFilter:
         except Exception as e:
             logger.error("Error reading allowlist file: %s", e, exc_info=True)
             return set(), set()
+
+    def _is_opted_out(self, quote_id: str) -> bool:
+        """Check if the quote ID is in the opt-out table."""
+        try:
+            response = self.opt_out_table.get_item(Key={"quote_id": quote_id})
+            if "Item" in response:
+                logger.info("Quote ID %s is opted out", quote_id)
+                return True
+            return False
+        except ClientError as e:
+            logger.error(
+                "Error checking opt-out status for quote ID %s: %s",
+                quote_id,
+                e,
+                exc_info=True,
+            )
+            return False
 
     def filter_quotes(self) -> List[Quote]:
         """Filter quotes based on cadence + allowlist by customer type.
@@ -71,6 +95,9 @@ class QuoteFilter:
                     continue
 
             else:
+                continue
+
+            if self._is_opted_out(quote.id):
                 continue
 
             logger.info(

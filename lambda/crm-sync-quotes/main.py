@@ -19,6 +19,7 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 TABLE_NAME = "TABLE_NAME"
+OPT_OUT_TABLE_NAME = "OPT_OUT_TABLE_NAME"
 SENDER = "SENDER_EMAIL"
 DOMANAIN = "DOMAIN"
 TEMPLATE_PATH = "assets/template.html"
@@ -62,7 +63,10 @@ def handler(event, context):
         logger.info(f"Deleted temporary file {temp_file_path}")
     dynamodb = boto3.resource("dynamodb")
     transactions_table: Table = dynamodb.Table(safe_get_env(TABLE_NAME))
-    quote_filter = QuoteFilter(quotes, EMAIL_CADENCE_DAYS, ALLOW_LIST_PATH)
+    opt_out_table: Table = dynamodb.Table(safe_get_env(OPT_OUT_TABLE_NAME))
+    quote_filter = QuoteFilter(
+        quotes, EMAIL_CADENCE_DAYS, ALLOW_LIST_PATH, opt_out_table
+    )
     filtered_quotes = quote_filter.filter_quotes()
     logger.info(
         f"Filtered down to {len(filtered_quotes)} quotes after applying cadence and allowlist"
