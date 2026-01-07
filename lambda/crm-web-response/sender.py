@@ -50,7 +50,7 @@ class ResponseEmailSender:
                 Destination={"ToAddresses": [email_transaction.sales_rep.email]},
                 Message={
                     "Subject": {
-                        "Data": f"Respuesta recibida para la cotización {email_transaction.quote_id}",
+                        "Data": f"To cotización {email_transaction.quote_id} necesita ser atendida",
                         "Charset": "UTF-8",
                     },
                     "Body": {
