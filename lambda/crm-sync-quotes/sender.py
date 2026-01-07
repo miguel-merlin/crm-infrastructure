@@ -61,7 +61,10 @@ class QuoteEmailSender:
             try:
                 response = self.ses_client.send_email(
                     Source=self.sender_email,
-                    Destination={"ToAddresses": [quote.prospect.email]},
+                    Destination={
+                        "ToAddresses": [quote.prospect.email],
+                        "CcAddresses": [quote.sales_rep.email],
+                    },
                     Message={
                         "Subject": {
                             "Data": f"Detalles de tu cotización {quote.id}",
