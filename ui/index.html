@@ -282,10 +282,6 @@
                 <div class="hero-body">
                     <div class="meta" aria-label="Detalles">
                         <div class="meta-row">
-                            <b>ID de transacción</b>
-                            <span id="quote-id">—</span>
-                        </div>
-                        <div class="meta-row">
                             <b>Respuesta</b>
                             <span id="response-label">—</span>
                         </div>
@@ -341,7 +337,7 @@
 
         const responseMessage = (response) => {
             const map = {
-                buy: "Gracias por confirmar tu interés en continuar. Ya estamos gestionando el siguiente paso.",
+                buy: "Gracias por confirmar tu interés en continuar con la cotización. Tu vendedor te contactará pronto.",
                 more_info:
                     "Gracias por pedir más información. Un asesor te contactará con los detalles.",
                 not_interested:
@@ -382,10 +378,6 @@
 
             const msgNode = document.getElementById("response-message");
             if (msgNode) msgNode.textContent = responseMessage(response);
-            if (!transactionId || !response) {
-                const title = document.getElementById("page-title");
-                if (title) title.textContent = "Hemos recibido tu visita";
-            }
 
             if (transactionId) {
                 postResponse({
