@@ -1,14 +1,22 @@
 import boto3
 from mypy_boto3_dynamodb.service_resource import Table
-from typing import List, Set, Dict
+from typing import List
 from datetime import datetime
 from model import Quote, EmailTransaction, EmailStatus
-from jinja2 import Template
+from jinja2 import Template, Environment
 import logging
 import uuid
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
+
+
+def _format_money(value) -> str:
+    try:
+        # "$1,234.56"
+        return f"${float(value):,.2f}"
+    except Exception:
+        return str(value)
 
 
 class QuoteEmailSender:
@@ -28,7 +36,9 @@ class QuoteEmailSender:
         try:
             with open(template_path, "r", encoding="utf-8") as f:
                 template_content = f.read()
-            self.template: Template = Template(template_content)
+            env = Environment(autoescape=True)
+            env.filters["format_money"] = _format_money
+            self.template = env.from_string(template_content)
         except Exception as e:
             raise ValueError(f"Error reading email template: {str(e)}") from e
 
@@ -43,6 +53,7 @@ class QuoteEmailSender:
             transaction_id=transaction_id,
             domain=self.domain,
             prospect_id=quote.prospect.id,
+            roducts=quote.products,
         )
 
     def _batch_write_transactions(self, transactions: List[EmailTransaction]) -> None:

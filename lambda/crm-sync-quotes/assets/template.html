@@ -61,6 +61,86 @@
                                         style="color: #003f6e; font-weight: bold; font-size: 11px; text-transform: uppercase;">Fecha</span><br>
                                     {{ created_at }}
                                 </p>
+                                <!-- Productos -->
+                                <div style="margin: 18px 0 10px 0;">
+                                    <p style="margin: 0 0 10px 0; font-size: 14px; font-weight: bold; color: #0b1f2a;">
+                                        Productos de la cotización
+                                    </p>
+
+                                    <table width="100%" border="0" cellspacing="0" cellpadding="0"
+                                        style="border: 1px solid rgba(0, 63, 110, 0.16); border-radius: 12px; overflow: hidden; border-collapse: separate;">
+                                        <tr>
+                                            <td
+                                                style="padding: 10px 12px; background-color: #f4f7f9; border-bottom: 1px solid rgba(0, 63, 110, 0.16);">
+                                                <table width="100%" border="0" cellspacing="0" cellpadding="0"
+                                                    style="border-collapse: collapse;">
+                                                    <tr
+                                                        style="font-size: 11px; color: rgba(11, 31, 42, 0.68); text-transform: uppercase;">
+                                                        <td style="padding: 0; font-weight: bold;">Producto</td>
+                                                        <td
+                                                            style="padding: 0; text-align: center; font-weight: bold; width: 70px;">
+                                                            Cant.</td>
+                                                        <td
+                                                            style="padding: 0; text-align: right; font-weight: bold; width: 110px;">
+                                                            Precio</td>
+                                                        <td
+                                                            style="padding: 0; text-align: right; font-weight: bold; width: 110px;">
+                                                            Total</td>
+                                                    </tr>
+                                                </table>
+                                            </td>
+                                        </tr>
+
+                                        {% for p in products %}
+                                        <tr>
+                                            <td
+                                                style="padding: 10px 12px; border-bottom: 1px solid rgba(0, 63, 110, 0.10);">
+                                                <table width="100%" border="0" cellspacing="0" cellpadding="0"
+                                                    style="border-collapse: collapse;">
+                                                    <tr style="font-size: 13px; color: #0b1f2a;">
+                                                        <td style="padding: 0;">
+                                                            <div style="font-weight: bold; margin-bottom: 2px;">
+                                                                {{ p.product_id }}
+                                                            </div>
+                                                            <div
+                                                                style="font-size: 12px; color: rgba(11, 31, 42, 0.68);">
+                                                                {{ p.description }}
+                                                            </div>
+                                                        </td>
+                                                        <td style="padding: 0; text-align: center; width: 70px;">
+                                                            {{ p.quantity }}
+                                                        </td>
+                                                        <td style="padding: 0; text-align: right; width: 110px;">
+                                                            {{ p.price | money }}
+                                                        </td>
+                                                        <td
+                                                            style="padding: 0; text-align: right; width: 110px; font-weight: bold;">
+                                                            {{ p.total_price | money }}
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+
+                                        <tr>
+                                            <td style="padding: 12px; background-color: #f9fbfc;">
+                                                <table width="100%" border="0" cellspacing="0" cellpadding="0"
+                                                    style="border-collapse: collapse;">
+                                                    <tr>
+                                                        <td style="font-size: 12px; color: rgba(11, 31, 42, 0.68);">
+                                                            * Totales mostrados por partida.
+                                                        </td>
+                                                        <td
+                                                            style="text-align: right; font-size: 14px; font-weight: bold; color: #0b1f2a;">
+                                                            Total cotización: {{ amount | money }}
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
                             </div>
 
                             <p style="margin: 15px 0; font-size: 14px;"><strong>¿Cómo deseas continuar?</strong></p>
