@@ -46,10 +46,10 @@ The root CDK stack (`lib/crm-infra-stack.ts`) orchestrates three main constructs
 *   **Key Modules**:
     *   `parser.py`: Handles ZIP extraction and DBF parsing.
         *   **Expected Files**: `cotizac.DBF` (Headers), `cotizad.DBF` (Items), `clientes.DBF`, `prospect.DBF`.
-        *   **Logic**: Joins headers with items and customer data (Client or Prospect).
+        *   **Logic**: Joins headers with items and customer data (Client or Prospect). Enriches product data using bundled `assets/products.csv`.
     *   `filter.py`: Applies business logic.
-        *   **Cadence**: Checks if `(Today - QuoteDate)` matches configured days `{3, 5, 8}`.
-        *   **Allowlist**: Checks `assets/allowlist.yaml` for valid `prospect_ids` or `customer_ids`.
+        *   **Cadence**: Checks if `(Today - QuoteDate)` matches configured days `{16}`.
+        *   **Allowlist**: Checks `assets/allowlist.yaml`. If `prospect_ids` is empty/missing, ALL prospects are allowed. Customers (`CLIENT`) always require an explicit match.
     *   `sender.py`: Handles email generation and sending (logic assumed based on name/context).
 
 ### B. Response Handler (`crm-web-response`)

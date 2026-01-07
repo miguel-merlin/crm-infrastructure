@@ -19,11 +19,14 @@ This process begins manually (upload) and ends with an email being sent and reco
     *   **Parsing**:
         *   `cotizac.DBF` is iterated row-by-row.
         *   For each quote, items are fetched from `cotizad.DBF`.
+        *   Product details are enriched using the bundled `assets/products.csv`.
         *   Customer details are resolved from `clientes.DBF` OR `prospect.DBF` based on `TIPO_CTE` ('C' or 'P').
     *   **Filtering**:
         *   **Date Check**: System calculates `Days = Today - QuoteDate`.
-        *   **Rule**: `Days` must exist in Configured Set `{3, 5, 8}`.
-        *   **Allowlist Check**: The Customer ID must exist in `assets/allowlist.yaml`.
+        *   **Rule**: `Days` must exist in Configured Set `{16}`.
+        *   **Allowlist Check**:
+            *   **Clients**: ID must exist in `assets/allowlist.yaml`.
+            *   **Prospects**: ID must exist in `assets/allowlist.yaml`, UNLESS the list is empty, in which case ALL prospects are allowed.
     *   **Sales Rep Resolution**:
         *   The Quote's Agent ID (`CVE_AGE`) is matched against `assets/sales_rep.csv` bundled with the Lambda.
 
