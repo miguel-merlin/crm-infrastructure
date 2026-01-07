@@ -7,8 +7,7 @@ import * as iam from "aws-cdk-lib/aws-iam";
 import { Construct } from "constructs";
 
 interface CrmIngestionProps {
-  tableName: string;
-  partitionKeyName: string;
+  table: dynamodb.Table;
   codePath: string;
   lambdaEnvVars?: { [key: string]: string };
   globalSecondaryIndexes?: {
@@ -32,15 +31,7 @@ export default class CrmIngestion extends Construct {
       autoDeleteObjects: true,
     });
 
-    this.table = new dynamodb.Table(this, "Table", {
-      tableName: props.tableName,
-      partitionKey: {
-        name: props.partitionKeyName,
-        type: dynamodb.AttributeType.STRING,
-      },
-      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
-      removalPolicy: cdk.RemovalPolicy.DESTROY,
-    });
+    this.table = props.table;
 
     if (props.globalSecondaryIndexes) {
       props.globalSecondaryIndexes.forEach((gsi) => {

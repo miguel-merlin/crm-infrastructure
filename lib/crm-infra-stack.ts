@@ -1,4 +1,5 @@
 import * as cdk from "aws-cdk-lib";
+import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
 import CrmIngestion from "./constructs/crm-ingestion-construct";
 import ApiResponse from "./constructs/crm-api-response-construct";
 import Website from "./constructs/crm-web-construct";
@@ -10,9 +11,18 @@ export class CrmInfraStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    const crmIngestion = new CrmIngestion(this, "QuotesIngestion", {
+    const emailTransactionsTable = new dynamodb.Table(this, "Table", {
       tableName: "crm-quotes-emails-transactions",
-      partitionKeyName: "transaction_id",
+      partitionKey: {
+        name: "transaction_id",
+        type: dynamodb.AttributeType.STRING,
+      },
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+    });
+
+    const crmIngestion = new CrmIngestion(this, "QuotesIngestion", {
+      table: emailTransactionsTable,
       codePath: "./lambda/crm-sync-quotes",
       lambdaEnvVars: {
         SENDER_EMAIL: "contacto@" + DOMAIN,
@@ -27,6 +37,7 @@ export class CrmInfraStack extends cdk.Stack {
     });
 
     new ApiResponse(this, "ApiResponse", {
+      transactionsTable: emailTransactionsTable,
       tableName: "crm-api-responses",
       lambdaCodePath: "./lambda/crm-web-response",
       enableCors: true,

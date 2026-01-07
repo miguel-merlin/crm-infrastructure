@@ -8,6 +8,11 @@ import * as path from "path";
 
 export interface ApiResponseProps {
   /**
+   * The DynamoDB table that stores email transaction responses.
+   */
+  transactionsTable: dynamodb.Table;
+
+  /**
    * The path to the directory containing the Python lambda code.
    * Defaults to '../lambda' relative to the executing code if not provided.
    */
@@ -36,7 +41,7 @@ export default class ApiResponse extends Construct {
   public readonly handler: lambda.Function;
   public readonly api: apigateway.RestApi;
 
-  constructor(scope: Construct, id: string, props: ApiResponseProps = {}) {
+  constructor(scope: Construct, id: string, props: ApiResponseProps) {
     super(scope, id);
 
     this.table = new dynamodb.Table(this, "Table", {
@@ -98,6 +103,8 @@ export default class ApiResponse extends Construct {
         ],
       })
     );
+
+    props.transactionsTable.grantReadWriteData(this.handler);
 
     new cdk.CfnOutput(this, "ApiEndpointUrl", {
       value: this.api.url,
