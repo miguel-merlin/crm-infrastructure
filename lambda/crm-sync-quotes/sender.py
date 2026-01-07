@@ -1,6 +1,6 @@
 import boto3
 from mypy_boto3_dynamodb.service_resource import Table
-from typing import List
+from typing import List, Dict
 from datetime import datetime
 from model import Quote, EmailTransaction, EmailStatus
 from jinja2 import Environment
@@ -19,6 +19,9 @@ def _format_money(value) -> str:
         return str(value)
 
 
+DEFAULT_SUBJECT = "Detalles de tu cotización"
+
+
 class QuoteEmailSender:
     def __init__(
         self,
@@ -27,12 +30,14 @@ class QuoteEmailSender:
         sender_email: str,
         transactions_table: Table,
         domain: str,
+        email_subject_config: Dict[int, str],
     ) -> None:
         self.quotes = quotes
         self.ses_client = boto3.client("ses")
         self.sender_email = sender_email
         self.transactions_table = transactions_table
         self.domain = domain
+        self.email_subject_config = email_subject_config
         try:
             with open(template_path, "r", encoding="utf-8") as f:
                 template_content = f.read()
@@ -69,6 +74,11 @@ class QuoteEmailSender:
             transaction_id = str(uuid.uuid4())
             rendered_email = self._render_template(quote, transaction_id)
             body_text = "Los detalles de tu cotización están adjuntos."
+            day_diff = (datetime.now() - datetime.fromisoformat(quote.created_at)).days
+            subject = (
+                self.email_subject_config.get(day_diff, DEFAULT_SUBJECT)
+                + f" - {quote.id}"
+            )
             try:
                 response = self.ses_client.send_email(
                     Source=self.sender_email,
@@ -78,7 +88,7 @@ class QuoteEmailSender:
                     },
                     Message={
                         "Subject": {
-                            "Data": f"Detalles de tu cotización {quote.id}",
+                            "Data": subject,
                             "Charset": "UTF-8",
                         },
                         "Body": {
