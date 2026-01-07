@@ -37,7 +37,7 @@ export class CrmInfraStack extends cdk.Stack {
       lambdaEnvVars: {
         SENDER_EMAIL: "contacto@" + DOMAIN,
         DOMAIN: "https://" + SUBDOMAIN + "." + DOMAIN,
-        OPT_OUTS_TABLE_NAME: optOutsTable.tableName,
+        OPT_OUT_TABLE_NAME: optOutsTable.tableName,
       },
       globalSecondaryIndexes: [
         {
@@ -56,7 +56,7 @@ export class CrmInfraStack extends cdk.Stack {
       lambdaEnvVars: {
         EMAIL_TRANSACTION_TABLE_NAME: crmIngestion.table.tableName,
         SENDER_EMAIL: "contacto@" + DOMAIN,
-        OPT_OUTS_TABLE_NAME: optOutsTable.tableName,
+        OPT_OUT_TABLE_NAME: optOutsTable.tableName,
       },
     });
     optOutsTable.grantReadWriteData(webApiTracking.handler);
