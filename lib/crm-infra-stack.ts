@@ -21,12 +21,23 @@ export class CrmInfraStack extends cdk.Stack {
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
 
+    const optOutsTable = new dynamodb.Table(this, "OptOutsTable", {
+      tableName: "crm-email-opt-outs",
+      partitionKey: {
+        name: "quote_id",
+        type: dynamodb.AttributeType.STRING,
+      },
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+      removalPolicy: cdk.RemovalPolicy.RETAIN,
+    });
+
     const crmIngestion = new CrmIngestion(this, "QuotesIngestion", {
       table: emailTransactionsTable,
       codePath: "./lambda/crm-sync-quotes",
       lambdaEnvVars: {
         SENDER_EMAIL: "contacto@" + DOMAIN,
         DOMAIN: "https://" + SUBDOMAIN + "." + DOMAIN,
+        OPT_OUTS_TABLE_NAME: optOutsTable.tableName,
       },
       globalSecondaryIndexes: [
         {
@@ -35,8 +46,9 @@ export class CrmInfraStack extends cdk.Stack {
         },
       ],
     });
+    optOutsTable.grantReadWriteData(crmIngestion.processor);
 
-    new ApiResponse(this, "ApiResponse", {
+    const webApiTracking = new ApiResponse(this, "ApiResponse", {
       transactionsTable: emailTransactionsTable,
       tableName: "crm-api-responses",
       lambdaCodePath: "./lambda/crm-web-response",
@@ -44,8 +56,10 @@ export class CrmInfraStack extends cdk.Stack {
       lambdaEnvVars: {
         EMAIL_TRANSACTION_TABLE_NAME: crmIngestion.table.tableName,
         SENDER_EMAIL: "contacto@" + DOMAIN,
+        OPT_OUTS_TABLE_NAME: optOutsTable.tableName,
       },
     });
+    optOutsTable.grantReadWriteData(webApiTracking.handler);
 
     new Website(this, "LandingPage", {
       bucketName: "crm-landing-page-bucket",
