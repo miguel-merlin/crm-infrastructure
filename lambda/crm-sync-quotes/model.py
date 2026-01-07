@@ -33,6 +33,14 @@ class SalesRep:
     email: str
     phone_number: str
 
+    def to_dynamodb_item(self) -> dict:
+        return {
+            "sales_rep_id": self.id,
+            "name": self.name,
+            "email": self.email,
+            "phone_number": self.phone_number,
+        }
+
 
 @dataclass
 class BaseProduct:
@@ -81,7 +89,7 @@ class Quote:
             "prospect_id": self.prospect.id,
             "prospect_name": self.prospect.name,
             "prospect_email": self.prospect.email,
-            "sales_rep": self.sales_rep,
+            "sales_rep": self.sales_rep.to_dynamodb_item(),
             "products": [product.to_dynamodb_item() for product in self.products],
             "amount": self.amount,
             "status": self.status.value,
@@ -113,4 +121,5 @@ class EmailTransaction:
             "email_address": self.email_address,
             "sent_at": self.sent_at,
             "status": self.status.value,
+            "sales_rep": self.sales_rep.to_dynamodb_item(),
         }
