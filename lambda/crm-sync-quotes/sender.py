@@ -3,7 +3,7 @@ from mypy_boto3_dynamodb.service_resource import Table
 from typing import List, Dict
 from datetime import datetime
 from model import Quote, EmailTransaction, EmailStatus
-from jinja2 import Environment
+from jinja2 import Environment, select_autoescape
 import logging
 import uuid
 
@@ -41,8 +41,8 @@ class QuoteEmailSender:
         try:
             with open(template_path, "r", encoding="utf-8") as f:
                 template_content = f.read()
-            env = Environment(autoescape=True)
-            env.filters["format_money"] = _format_money
+            env = Environment(autoescape=select_autoescape(["html", "xml"]))
+            env.filters["money"] = _format_money
             self.template = env.from_string(template_content)
         except Exception as e:
             raise ValueError(f"Error reading email template: {str(e)}") from e
@@ -58,7 +58,7 @@ class QuoteEmailSender:
             transaction_id=transaction_id,
             domain=self.domain,
             prospect_id=quote.prospect.id,
-            roducts=quote.products,
+            products=quote.products,
         )
 
     def _batch_write_transactions(self, transactions: List[EmailTransaction]) -> None:
