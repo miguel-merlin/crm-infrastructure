@@ -1,5 +1,13 @@
 from typing import List, Dict, Optional
-from model import Quote, Prospect, QuoteStatus, SalesRep, CustomerType
+from model import (
+    Quote,
+    Prospect,
+    QuoteStatus,
+    SalesRep,
+    CustomerType,
+    BaseProduct,
+    Product,
+)
 from utils import extract_email, find_file
 import logging
 import tempfile
@@ -25,9 +33,14 @@ STATUS_MAPPING = {
 
 
 class QuoteParser:
-    def __init__(self, zip_file_path: str, sales_reps_path: str) -> None:
+    def __init__(
+        self, zip_file_path: str, sales_reps_path: str, products_path: str
+    ) -> None:
         self.zip_file_path = zip_file_path
         self.sales_reps: Dict[str, SalesRep] = self._load_sales_reps(sales_reps_path)
+        self.products_map: Dict[str, BaseProduct] = self._parse_products_from_csv(
+            products_path
+        )
 
     def _load_sales_reps(self, sales_reps_path: str) -> Dict[str, SalesRep]:
         sales_reps: Dict[str, SalesRep] = {}
@@ -85,12 +98,12 @@ class QuoteParser:
                     DBF(prospects_path, encoding="latin1", ignore_missing_memofile=True)
                 )
                 prospects_dict = {rec["CVE_PROS"]: rec for rec in prospects_records}
-            items_by_quote = self._group_items_by_quote(cotizad_records)
+            products_by_quote = self._group_products_by_quote(cotizad_records)
             for cotizac_rec in cotizac_records:
                 try:
                     quote = self._parse_quote(
                         cotizac_rec,
-                        items_by_quote,
+                        products_by_quote,
                         clientes_dict,
                         prospects_dict,
                     )
@@ -105,17 +118,42 @@ class QuoteParser:
         logger.info(f"Parsed {len(quotes)} quotes from ZIP file")
         return quotes
 
-    def _group_items_by_quote(self, cotizad_records: list) -> Dict[str, List[str]]:
-        items_by_quote: Dict[str, List[str]] = {}
+    def _group_products_by_quote(
+        self, cotizad_records: list
+    ) -> Dict[str, List[Product]]:
+        products_by_quote: Dict[str, List[Product]] = {}
         for rec in cotizad_records:
             no_cot = rec.get("NO_COT")
             cve_prod = rec.get("CVE_PROD")
             if no_cot is not None and cve_prod:
                 quote_id = str(int(no_cot)).strip()
-                if quote_id not in items_by_quote:
-                    items_by_quote[quote_id] = []
-                items_by_quote[quote_id].append(str(cve_prod).strip())
-        return items_by_quote
+                if quote_id not in products_by_quote:
+                    products_by_quote[quote_id] = []
+                quantity = rec.get("CANT_PROD")
+                price = rec.get("VALOR_PROD")
+                vat = rec.get("IVA_PROD")
+                if not quantity or not price:
+                    raise ValueError(
+                        f"Invalid product data for quote {quote_id}, product {cve_prod}, missing quantity or price."
+                    )
+                product_id = str(cve_prod).strip()
+                product = Product(
+                    product_id=product_id,
+                    description=self.products_map.get(
+                        product_id,
+                        BaseProduct.get_empty(product_id),
+                    ).description,
+                    product_type=self.products_map.get(
+                        product_id,
+                        BaseProduct.get_empty(product_id),
+                    ).product_type,
+                    quantity=quantity,
+                    price=price,
+                    vat_perc=vat,
+                    total_price=round(quantity * price * (1 + (vat or 0) / 100), 2),
+                )
+                products_by_quote[quote_id].append(product)
+        return products_by_quote
 
     def _parse_prospect_from_prospect_dbf(
         self, prospect_rec: Dict
@@ -152,10 +190,45 @@ class QuoteParser:
             return CustomerType.CLIENT
         return None
 
+    def _parse_products_from_csv(self, file_path: str) -> Dict[str, BaseProduct]:
+        """
+        Reads products from a CSV file.
+        """
+        products = {}
+        with open(file_path, mode="r", encoding="latin-1") as csvfile:
+            reader = csv.reader(csvfile)
+            header_found = False
+            for row in reader:
+                if not row:
+                    continue
+                if len(row) > 3 and row[3] == "Clave":
+                    header_found = True
+                    break
+
+            if not header_found:
+                return {}
+            for row in reader:
+                if not row:
+                    continue
+                if len(row) <= 14:
+                    continue
+
+                id_ = row[3].strip()
+                if not id_:
+                    continue
+
+                description = row[4].strip()
+                product_type = row[14].strip()
+                products[id_] = BaseProduct(
+                    product_id=id_, description=description, product_type=product_type
+                )
+
+        return products
+
     def _parse_quote(
         self,
         cotizac_rec: Dict,
-        items_by_quote: Dict[str, List[str]],
+        products_by_quote: Dict[str, List[Product]],
         clientes_dict: Dict,
         prospects_dict: Dict,
     ) -> Optional[Quote]:
@@ -186,7 +259,6 @@ class QuoteParser:
         if not prospect:
             logger.debug(f"Skipping quote {no_cot}: No prospect information found")
             return None
-        item_ids = items_by_quote.get(no_cot, [])
         status = self._map_status(status_str)
         created_at = f_alta_cot
         sales_rep = self.sales_reps.get(cve_age)
@@ -198,7 +270,7 @@ class QuoteParser:
             customer_type=customer_type,
             prospect=prospect,
             sales_rep=sales_rep,
-            item_ids=item_ids,
+            products=products_by_quote.get(no_cot, []),
             amount=float(total_cot) if total_cot is not None else 0.0,
             status=status,
             created_at=str(created_at),

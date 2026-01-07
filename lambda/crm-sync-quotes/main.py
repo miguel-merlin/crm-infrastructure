@@ -23,7 +23,8 @@ SENDER = "SENDER_EMAIL"
 DOMANAIN = "DOMAIN"
 TEMPLATE_PATH = "assets/template.html"
 SALES_REPS_PATH = "assets/sales_rep.csv"
-EMAIL_CADENCE_DAYS = set([11])
+PRODUCTS_PATH = "assets/products.csv"
+EMAIL_CADENCE_DAYS = set([16])  # set([7, 14, 21])
 ALLOW_LIST_PATH = "assets/allowlist.yaml"
 
 
@@ -39,7 +40,7 @@ def handler(event, context):
     temp_file_path = None
     try:
         temp_file_path = download_file_from_s3(s3_client, bucket_name, object_key)
-        parser = QuoteParser(temp_file_path, SALES_REPS_PATH)
+        parser = QuoteParser(temp_file_path, SALES_REPS_PATH, PRODUCTS_PATH)
         quotes: List[Quote] = parser.read_quotes_from_zip()
         logger.info(f"Read {len(quotes)} quotes from the file")
     except Exception as e:

@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 from enum import Enum
-from shlex import quote
 
 
 class QuoteStatus(Enum):
@@ -36,12 +35,41 @@ class SalesRep:
 
 
 @dataclass
+class BaseProduct:
+    product_id: str
+    description: str
+    product_type: str
+
+    @staticmethod
+    def get_empty(product_id: str) -> "BaseProduct":
+        return BaseProduct(product_id=product_id, description="", product_type="")
+
+
+@dataclass
+class Product(BaseProduct):
+    quantity: int
+    price: float
+    vat_perc: float
+    total_price: float
+
+    def to_dynamodb_item(self) -> dict:
+        return {
+            "item_id": self.product_id,
+            "description": self.description,
+            "quantity": self.quantity,
+            "price": self.price,
+            "vat_perc": self.vat_perc,
+            "total_price": self.total_price,
+        }
+
+
+@dataclass
 class Quote:
     id: str
     customer_type: CustomerType
     prospect: Prospect
     sales_rep: SalesRep
-    item_ids: list[str]
+    products: list[Product]
     amount: float
     status: QuoteStatus
     created_at: str
@@ -54,7 +82,7 @@ class Quote:
             "prospect_name": self.prospect.name,
             "prospect_email": self.prospect.email,
             "sales_rep": self.sales_rep,
-            "item_ids": self.item_ids,
+            "products": [product.to_dynamodb_item() for product in self.products],
             "amount": self.amount,
             "status": self.status.value,
             "created_at": self.created_at,
