@@ -3,7 +3,7 @@ from mypy_boto3_dynamodb.service_resource import Table
 from typing import List
 from datetime import datetime
 from model import Quote, EmailTransaction, EmailStatus
-from jinja2 import Template, Environment
+from jinja2 import Environment
 import logging
 import uuid
 
