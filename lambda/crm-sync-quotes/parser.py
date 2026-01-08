@@ -135,17 +135,30 @@ class QuoteParser:
             quantity = rec.get("CANT_PROD")
             price = rec.get("VALOR_PROD")
 
-            if not quantity or not price:
+            if quantity is None or price is None:
                 raise ValueError(
                     f"Invalid product data for quote {quote_id}, "
                     f"product {product_id}, missing quantity or price."
                 )
 
-            vat = rec.get("IVA_PROD") or 0
+            vat_perc = rec.get("IVA_PROD") or 0
+            discount_1 = rec.get("DCTO1") or 0
+            discount_2 = rec.get("DCTO2") or 0
 
             base_product = self.products_map.get(
                 product_id, BaseProduct.get_empty(product_id)
             )
+
+            line_subtotal = quantity * price
+
+            d1 = float(discount_1) / 100.0
+            d2 = float(discount_2) / 100.0
+            discounted_subtotal = line_subtotal * (1.0 - d1) * (1.0 - d2)
+
+            vat_rate = float(vat_perc) / 100.0
+            vat_amount = discounted_subtotal * vat_rate
+
+            total_price = round(discounted_subtotal + vat_amount, 2)
 
             product = Product(
                 product_id=product_id,
@@ -153,8 +166,11 @@ class QuoteParser:
                 product_type=base_product.product_type,
                 quantity=quantity,
                 price=price,
-                vat_perc=vat,
-                total_price=round(quantity * price * (1 + vat / 100), 2),
+                vat_perc=vat_perc,
+                vat=round(vat_amount, 2),
+                discount_1=discount_1,
+                discount_2=discount_2,
+                total_price=total_price,
             )
 
             products_by_quote.setdefault(quote_id, []).append(product)

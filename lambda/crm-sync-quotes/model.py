@@ -58,7 +58,10 @@ class Product(BaseProduct):
     quantity: int
     price: float
     vat_perc: float
+    vat: float
     total_price: float
+    discount_1: float = 0.0
+    discount_2: float = 0.0
 
     def to_dynamodb_item(self) -> dict:
         return {
