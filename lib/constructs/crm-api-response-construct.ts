@@ -69,6 +69,7 @@ export default class ApiResponse extends Construct {
           ],
         },
       }),
+      description: `CRM API Response Handler - ${id}`,
       environment: {
         TABLE_NAME: this.table.tableName,
         ENABLE_CORS: String(props.enableCors ?? true),
