@@ -99,6 +99,9 @@ class Quote:
             "created_at": self.created_at,
         }
 
+    def compute_total_vat(self) -> float:
+        return sum(product.vat for product in self.products)
+
 
 class EmailStatus(Enum):
     NO_RESPONSE = "No Response"

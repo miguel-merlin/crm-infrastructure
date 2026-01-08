@@ -59,6 +59,7 @@ class QuoteEmailSender:
             domain=self.domain,
             prospect_id=quote.prospect.id,
             products=quote.products,
+            total_vat=quote.compute_total_vat(),
         )
 
     def _batch_write_transactions(self, transactions: List[EmailTransaction]) -> None:

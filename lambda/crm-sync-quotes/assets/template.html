@@ -84,6 +84,10 @@
                                                             style="padding: 0; text-align: right; font-weight: bold; width: 110px;">
                                                             Precio</td>
                                                         <td
+                                                            style="padding: 0; text-align: right; font-weight: bold; width: 90px;">
+                                                            IVA
+                                                        </td>
+                                                        <td
                                                             style="padding: 0; text-align: right; font-weight: bold; width: 110px;">
                                                             Total</td>
                                                     </tr>
@@ -113,6 +117,9 @@
                                                         <td style="padding: 0; text-align: right; width: 110px;">
                                                             {{ p.price | money }}
                                                         </td>
+                                                        <td style="padding: 0; text-align: right; width: 90px;">
+                                                            {{ p.vat | money }}
+                                                        </td>
                                                         <td
                                                             style="padding: 0; text-align: right; width: 110px; font-weight: bold;">
                                                             {{ p.total_price | money }}
@@ -131,59 +138,72 @@
                                                         <td style="font-size: 12px; color: rgba(11, 31, 42, 0.68);">
                                                             * Totales mostrados por partida.
                                                         </td>
-                                                        <td
-                                                            style="text-align: right; font-size: 14px; font-weight: bold; color: #0b1f2a;">
-                                                            Total cotización: {{ amount | money }}
+                                                    <tr>
+                                                        <td style="font-size: 12px; color: rgba(11, 31, 42, 0.68);">
+                                                            IVA
+                                                        </td>
+                                                        <td style="text-align: right; font-size: 13px; color: #0b1f2a;">
+                                                            {{ total_vat | money }}
                                                         </td>
                                                     </tr>
-                                                </table>
-                                            </td>
+
+                                                    <tr>
+                                                        <td style="font-size: 13px; font-weight: bold; color: #0b1f2a;">
+                                                            Total cotización
+                                                        </td>
+                                                        <td
+                                                            style="text-align: right; font-size: 14px; font-weight: bold; color: #0b1f2a;">
+                                                            {{ amount | money }}
+                                                        </td>
+                                                    </tr>
                                         </tr>
                                     </table>
-                                </div>
-                            </div>
-
-                            <p style="margin: 15px 0; font-size: 14px;"><strong>¿Cómo deseas continuar?</strong></p>
-
-                            <table width="100%" border="0" cellspacing="0" cellpadding="0">
-                                <tr>
-                                    <td style="padding-bottom: 12px;">
-                                        <a href="{{ domain }}?transaction_id={{ transaction_id }}&response=buy&prospect_id={{ prospect_id }}"
-                                            style="background-color: #003f6e; color: #ffffff; padding: 12px 20px; text-decoration: none; border-radius: 25px; font-weight: bold; display: block; text-align: center; font-size: 14px;">
-                                            Quiero comprar
-                                        </a>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td style="padding-bottom: 12px;">
-                                        <a href="{{ domain }}?transaction_id={{ transaction_id }}&response=more_info&prospect_id={{ prospect_id }}"
-                                            style="background-color: #e5f5fa; border: 1px solid #00b0e1; color: #003f6e; padding: 12px 20px; text-decoration: none; border-radius: 25px; font-weight: bold; display: block; text-align: center; font-size: 14px;">
-                                            Hablar con un asesor
-                                        </a>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td align="center">
-                                        <a href="{{ domain }}?transaction_id={{ transaction_id }}&response=not_interested&prospect_id={{ prospect_id }}"
-                                            style="color: rgba(11, 31, 42, 0.62); text-decoration: underline; font-size: 12px; font-weight: bold;">
-                                            Ya no estoy interesado
-                                        </a>
-                                    </td>
-                                </tr>
-                            </table>
                         </td>
                     </tr>
+                </table>
+                </div>
+                </div>
 
+                <p style="margin: 15px 0; font-size: 14px;"><strong>¿Cómo deseas continuar?</strong></p>
+
+                <table width="100%" border="0" cellspacing="0" cellpadding="0">
                     <tr>
-                        <td
-                            style="padding: 20px; border-top: 1px solid #eceff1; font-size: 12px; color: rgba(11, 31, 42, 0.68);">
-                            Si tienes alguna duda, responde a este correo.<br>
-                            Gracias por confiar en nosotros.
+                        <td style="padding-bottom: 12px;">
+                            <a href="{{ domain }}?transaction_id={{ transaction_id }}&response=buy&prospect_id={{ prospect_id }}"
+                                style="background-color: #003f6e; color: #ffffff; padding: 12px 20px; text-decoration: none; border-radius: 25px; font-weight: bold; display: block; text-align: center; font-size: 14px;">
+                                Quiero comprar
+                            </a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding-bottom: 12px;">
+                            <a href="{{ domain }}?transaction_id={{ transaction_id }}&response=more_info&prospect_id={{ prospect_id }}"
+                                style="background-color: #e5f5fa; border: 1px solid #00b0e1; color: #003f6e; padding: 12px 20px; text-decoration: none; border-radius: 25px; font-weight: bold; display: block; text-align: center; font-size: 14px;">
+                                Hablar con un asesor
+                            </a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="center">
+                            <a href="{{ domain }}?transaction_id={{ transaction_id }}&response=not_interested&prospect_id={{ prospect_id }}"
+                                style="color: rgba(11, 31, 42, 0.62); text-decoration: underline; font-size: 12px; font-weight: bold;">
+                                Ya no estoy interesado
+                            </a>
                         </td>
                     </tr>
                 </table>
             </td>
         </tr>
+
+        <tr>
+            <td style="padding: 20px; border-top: 1px solid #eceff1; font-size: 12px; color: rgba(11, 31, 42, 0.68);">
+                Si tienes alguna duda, responde a este correo.<br>
+                Gracias por confiar en nosotros.
+            </td>
+        </tr>
+    </table>
+    </td>
+    </tr>
     </table>
 </body>
 
