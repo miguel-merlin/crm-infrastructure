@@ -3,10 +3,12 @@ import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
 import CrmIngestion from "./constructs/crm-ingestion-construct";
 import ApiResponse from "./constructs/crm-api-response-construct";
 import Website from "./constructs/crm-web-construct";
+import { EmailForwardingRuleSet } from "@seeebiii/ses-email-forwarding";
 import { Construct } from "constructs";
 
 const DOMAIN = "hidrorey.info";
 const SUBDOMAIN = "www";
+const FWD_EMAIL = "contacto@hidrorey.mx";
 export class CrmInfraStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
@@ -71,6 +73,22 @@ export class CrmInfraStack extends cdk.Stack {
         certificateArn:
           "arn:aws:acm:us-east-1:183631317390:certificate/b66da7de-bbc5-4968-bbe4-37fbe222b283",
       },
+    });
+
+    new EmailForwardingRuleSet(this, "EmailForwardingRuleSet", {
+      enableRuleSet: true,
+      emailForwardingProps: [
+        {
+          domainName: DOMAIN,
+          fromPrefix: "contacto",
+          emailMappings: [
+            {
+              receivePrefix: "contacto",
+              targetEmails: [FWD_EMAIL],
+            },
+          ],
+        },
+      ],
     });
   }
 }
