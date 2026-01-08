@@ -122,37 +122,43 @@ class QuoteParser:
         self, cotizad_records: list
     ) -> Dict[str, List[Product]]:
         products_by_quote: Dict[str, List[Product]] = {}
+
         for rec in cotizad_records:
             no_cot = rec.get("NO_COT")
             cve_prod = rec.get("CVE_PROD")
-            if no_cot is not None and cve_prod:
-                quote_id = str(int(no_cot)).strip()
-                if quote_id not in products_by_quote:
-                    products_by_quote[quote_id] = []
-                quantity = rec.get("CANT_PROD")
-                price = rec.get("VALOR_PROD")
-                vat = rec.get("IVA_PROD")
-                if not quantity or not price:
-                    raise ValueError(
-                        f"Invalid product data for quote {quote_id}, product {cve_prod}, missing quantity or price."
-                    )
-                product_id = str(cve_prod).strip()
-                product = Product(
-                    product_id=product_id,
-                    description=self.products_map.get(
-                        product_id,
-                        BaseProduct.get_empty(product_id),
-                    ).description,
-                    product_type=self.products_map.get(
-                        product_id,
-                        BaseProduct.get_empty(product_id),
-                    ).product_type,
-                    quantity=quantity,
-                    price=price,
-                    vat_perc=vat,
-                    total_price=round(quantity * price * (1 + (vat or 0) / 100), 2),
+            if not no_cot or not cve_prod:
+                continue
+
+            quote_id = str(int(no_cot)).strip()
+            product_id = str(cve_prod).strip()
+
+            quantity = rec.get("CANT_PROD")
+            price = rec.get("VALOR_PROD")
+
+            if not quantity or not price:
+                raise ValueError(
+                    f"Invalid product data for quote {quote_id}, "
+                    f"product {product_id}, missing quantity or price."
                 )
-                products_by_quote[quote_id].append(product)
+
+            vat = rec.get("IVA_PROD") or 0
+
+            base_product = self.products_map.get(
+                product_id, BaseProduct.get_empty(product_id)
+            )
+
+            product = Product(
+                product_id=product_id,
+                description=base_product.description,
+                product_type=base_product.product_type,
+                quantity=quantity,
+                price=price,
+                vat_perc=vat,
+                total_price=round(quantity * price * (1 + vat / 100), 2),
+            )
+
+            products_by_quote.setdefault(quote_id, []).append(product)
+
         return products_by_quote
 
     def _parse_prospect_from_prospect_dbf(
