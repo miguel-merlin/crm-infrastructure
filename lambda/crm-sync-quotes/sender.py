@@ -19,6 +19,19 @@ def _format_money(value) -> str:
         return str(value)
 
 
+def _format_percent(value) -> str:
+    try:
+        v = float(value)
+        if v <= 0:
+            return "—"
+        # show as 10% or 10.5% depending on input
+        if v.is_integer():
+            return f"{int(v)}%"
+        return f"{v:.2f}%"
+    except Exception:
+        return "—"
+
+
 DEFAULT_SUBJECT = "Detalles de tu cotización"
 
 
@@ -43,6 +56,7 @@ class QuoteEmailSender:
                 template_content = f.read()
             env = Environment(autoescape=select_autoescape(["html", "xml"]))
             env.filters["money"] = _format_money
+            env.filters["percent"] = _format_percent
             self.template = env.from_string(template_content)
         except Exception as e:
             raise ValueError(f"Error reading email template: {str(e)}") from e

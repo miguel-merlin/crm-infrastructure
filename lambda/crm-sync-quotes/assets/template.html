@@ -136,13 +136,13 @@
 
                                                         {% if has_discount_1 %}
                                                         <td style="padding: 0; text-align: right; width: 90px;">
-                                                            {{ p.discount_1 | money }}
+                                                            {{ p.discount_1 | percent }}
                                                         </td>
                                                         {% endif %}
 
                                                         {% if has_discount_2 %}
                                                         <td style="padding: 0; text-align: right; width: 90px;">
-                                                            {{ p.discount_2 | money }}
+                                                            {{ p.discount_2 | percent }}
                                                         </td>
                                                         {% endif %}
 
