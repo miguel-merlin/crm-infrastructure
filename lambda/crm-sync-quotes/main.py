@@ -27,7 +27,7 @@ SALES_REPS_PATH = "assets/sales_rep.csv"
 PRODUCTS_PATH = "assets/products.csv"
 ALLOW_LIST_PATH = "assets/allowlist.yaml"
 
-EMAIL_CADENCE_DAYS = set([16])  # set([7, 14, 21])
+EMAIL_CADENCE_DAYS = set([18])  # set([7, 14, 21])
 EMAIL_SUBJECT_CONFIG: Dict[int, str] = {
     16: "Estamos al pendiente, te envio detalles de to cotización",
     # 7: "Estamos al pendiente, te envio detalles de to cotización",

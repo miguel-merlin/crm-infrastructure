@@ -49,6 +49,7 @@ class QuoteEmailSender:
 
     def _render_template(self, quote: Quote, transaction_id: str) -> str:
         """Render the email template with quote data."""
+        has_discount_1, has_discount_2 = quote.has_discounts()
         return self.template.render(
             quote_id=quote.id,
             prospect_name=quote.prospect.name,
@@ -60,6 +61,8 @@ class QuoteEmailSender:
             prospect_id=quote.prospect.id,
             products=quote.products,
             total_vat=quote.compute_total_vat(),
+            has_discount_1=has_discount_1,
+            has_discount_2=has_discount_2,
         )
 
     def _batch_write_transactions(self, transactions: List[EmailTransaction]) -> None:

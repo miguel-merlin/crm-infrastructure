@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from enum import Enum
+from typing import Tuple
 
 
 class QuoteStatus(Enum):
@@ -101,6 +102,11 @@ class Quote:
 
     def compute_total_vat(self) -> float:
         return sum(product.vat for product in self.products)
+
+    def has_discounts(self) -> Tuple[bool, bool]:
+        return any(p.discount_1 > 0 for p in self.products), any(
+            p.discount_2 > 0 for p in self.products
+        )
 
 
 class EmailStatus(Enum):
