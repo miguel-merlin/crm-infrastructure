@@ -1,0 +1,251 @@
+<mjml>
+    <mj-head>
+        <mj-title>Recordatorio de Cotización | Hidrorey</mj-title>
+        <mj-attributes>
+            <mj-all font-family="Arial, sans-serif" color="#0b1f2a" />
+            <mj-text font-size="14px" line-height="1.6" />
+            <mj-button border-radius="25px" font-weight="bold" font-size="14px" />
+        </mj-attributes>
+        <mj-style>
+            /* Utility classes for responsive visibility */
+            @media only screen and (max-width:480px) {
+            .mobile-hide { display: none !important; }
+            .mobile-show { display: block !important; }
+            .mobile-padding { padding: 10px !important; }
+            }
+            @media only screen and (min-width:481px) {
+            .mobile-show { display: none !important; }
+            }
+
+            /* Table Styling */
+            .product-table th {
+            font-size: 11px;
+            color: rgba(11, 31, 42, 0.68);
+            text-transform: uppercase;
+            font-weight: bold;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(0, 63, 110, 0.16);
+            }
+            .product-table td {
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(0, 63, 110, 0.10);
+            }
+        </mj-style>
+    </mj-head>
+
+    <mj-body background-color="#f9fbfc">
+
+        <mj-section padding="0">
+            <mj-column>
+                <mj-text padding="0" height="6px">
+                    <div style="height:6px; background: linear-gradient(90deg, #e40e22, #00b0e1, #003f6e);"></div>
+                </mj-text>
+            </mj-column>
+        </mj-section>
+
+        <mj-section background-color="#ffffff" padding="20px">
+            <mj-column vertical-align="middle" width="50%">
+                <mj-image align="left" width="120px" src="https://www.hidrorey.info/assets/logo_blue.png" alt="Hidrorey"
+                    padding="0" />
+            </mj-column>
+            <mj-column vertical-align="middle" width="50%">
+                <mj-text align="right" font-size="12px" color="rgba(11, 31, 42, 0.68)">
+                    Recordatorio de cotización
+                </mj-text>
+            </mj-column>
+        </mj-section>
+
+        <mj-wrapper background-color="#ffffff" padding="0 20px">
+            <mj-section padding="0">
+                <mj-column>
+                    <mj-text font-size="18px" font-weight="bold">
+                        Hola, {{ prospect_name }}
+                    </mj-text>
+                    <mj-text>
+                        Te recordamos que tienes una cotización pendiente que aún no ha sido confirmada.
+                    </mj-text>
+                </mj-column>
+            </mj-section>
+
+            <mj-section padding="10px 0">
+                <mj-column background-color="#f4f7f9" border="1px solid rgba(0, 63, 110, 0.16)" border-radius="12px"
+                    padding="15px">
+                    <mj-text font-size="13px" padding="5px 25px">
+                        <span
+                            style="color: #003f6e; font-weight: bold; font-size: 11px; text-transform: uppercase;">Referencia</span><br />
+                        {{ quote_id }}
+                    </mj-text>
+                    <mj-text font-size="13px" padding="5px 25px">
+                        <span
+                            style="color: #003f6e; font-weight: bold; font-size: 11px; text-transform: uppercase;">Monto</span><br />
+                        ${{ amount }}
+                    </mj-text>
+                    <mj-text font-size="13px" padding="5px 25px">
+                        <span
+                            style="color: #003f6e; font-weight: bold; font-size: 11px; text-transform: uppercase;">Fecha</span><br />
+                        {{ created_at }}
+                    </mj-text>
+                </mj-column>
+            </mj-section>
+        </mj-wrapper>
+
+        <mj-wrapper background-color="#ffffff" padding="0 20px">
+            <mj-section padding="0">
+                <mj-column>
+                    <mj-text font-weight="bold" font-size="14px" padding-bottom="10px">
+                        Productos de la cotización
+                    </mj-text>
+
+                    <mj-table css-class="mobile-hide" padding="0" font-size="13px">
+                        <tr class="product-table">
+                            <th align="left">Producto</th>
+                            <th align="center" width="60px">Cant.</th>
+                            <th align="right" width="90px">Precio</th>
+                            {% if has_discount_1 %}
+                            <th align="right" width="70px">Desc. 1</th>
+                            {% endif %}
+                            {% if has_discount_2 %}
+                            <th align="right" width="70px">Desc. 2</th>
+                            {% endif %}
+                            <th align="right" width="70px">IVA</th>
+                            <th align="right" width="90px">Total</th>
+                        </tr>
+
+                        {% for p in products %}
+                        <tr class="product-table">
+                            <td align="left">
+                                <div style="font-weight: bold;">{{ p.product_id }}</div>
+                                <div style="font-size: 12px; color: rgba(11, 31, 42, 0.68);">{{ p.description }}</div>
+                            </td>
+                            <td align="center">{{ p.quantity }}</td>
+                            <td align="right">{{ p.price | money }}</td>
+                            {% if has_discount_1 %}
+                            <td align="right">{{ p.discount_1 | percent }}</td>
+                            {% endif %}
+                            {% if has_discount_2 %}
+                            <td align="right">{{ p.discount_2 | percent }}</td>
+                            {% endif %}
+                            <td align="right">{{ p.vat | money }}</td>
+                            <td align="right" style="font-weight: bold;">{{ p.total_price | money }}</td>
+                        </tr>
+                        {% endfor %}
+
+                        <tr>
+                            <td colspan="10" align="right" style="background-color: #f9fbfc; padding: 15px;">
+                                <table border="0" cellpadding="0" cellspacing="0" align="right">
+                                    <tr>
+                                        <td
+                                            style="font-size: 12px; color: rgba(11, 31, 42, 0.68); padding-right: 15px;">
+                                            IVA</td>
+                                        <td style="text-align: right; font-size: 13px;">{{ total_vat | money }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="font-size: 13px; font-weight: bold; padding-right: 15px;">Total
+                                            cotización</td>
+                                        <td style="text-align: right; font-size: 14px; font-weight: bold;">{{ amount |
+                                            money }}</td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </mj-table>
+
+                    <mj-text css-class="mobile-show" padding="0">
+                        {% for p in products %}
+                        <div style="padding: 15px; border-bottom: 1px solid rgba(0, 63, 110, 0.10);">
+                            <div style="font-weight: bold; font-size: 13px; margin-bottom: 4px;">{{ p.product_id }}
+                            </div>
+                            <div style="font-size: 12px; color: rgba(11, 31, 42, 0.68); margin-bottom: 10px;">{{
+                                p.description }}</div>
+
+                            <table width="100%" border="0" cellpadding="0" cellspacing="0" style="font-size: 12px;">
+                                <tr>
+                                    <td style="color: rgba(11, 31, 42, 0.68); padding: 2px 0;">Cantidad:</td>
+                                    <td style="text-align: right;">{{ p.quantity }}</td>
+                                </tr>
+                                <tr>
+                                    <td style="color: rgba(11, 31, 42, 0.68); padding: 2px 0;">Precio:</td>
+                                    <td style="text-align: right;">{{ p.price | money }}</td>
+                                </tr>
+                                {% if has_discount_1 %}
+                                <tr>
+                                    <td style="color: rgba(11, 31, 42, 0.68); padding: 2px 0;">Desc 1:</td>
+                                    <td style="text-align: right;">{{ p.discount_1 | percent }}</td>
+                                </tr>
+                                {% endif %}
+                                {% if has_discount_2 %}
+                                <tr>
+                                    <td style="color: rgba(11, 31, 42, 0.68); padding: 2px 0;">Desc 2:</td>
+                                    <td style="text-align: right;">{{ p.discount_2 | percent }}</td>
+                                </tr>
+                                {% endif %}
+                                <tr>
+                                    <td style="color: rgba(11, 31, 42, 0.68); padding: 2px 0; font-weight:bold;">Total:
+                                    </td>
+                                    <td style="text-align: right; font-weight:bold;">{{ p.total_price | money }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        {% endfor %}
+                        <div style="background-color: #f9fbfc; padding: 15px; margin-top: 10px; border-radius: 8px;">
+                            <table width="100%" border="0" cellpadding="0" cellspacing="0">
+                                <tr>
+                                    <td style="font-size: 12px; color: rgba(11, 31, 42, 0.68);">IVA</td>
+                                    <td style="text-align: right; font-size: 13px;">{{ total_vat | money }}</td>
+                                </tr>
+                                <tr>
+                                    <td style="font-size: 13px; font-weight: bold;">Total</td>
+                                    <td style="text-align: right; font-size: 14px; font-weight: bold;">{{ amount | money
+                                        }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </mj-text>
+
+                </mj-column>
+            </mj-section>
+        </mj-wrapper>
+
+        <mj-wrapper background-color="#ffffff" padding="10px 20px 30px 20px" border-radius="0 0 16px 16px">
+            <mj-section padding="0">
+                <mj-column>
+                    <mj-text align="center" font-weight="bold" padding-bottom="20px">
+                        ¿Cómo deseas continuar?
+                    </mj-text>
+
+                    <mj-button background-color="#003f6e" color="#ffffff"
+                        href="{{ domain }}?transaction_id={{ transaction_id }}&response=buy&prospect_id={{ prospect_id }}"
+                        width="100%">
+                        Quiero comprar
+                    </mj-button>
+
+                    <mj-button background-color="#e5f5fa" color="#003f6e" border="1px solid #00b0e1"
+                        href="{{ domain }}?transaction_id={{ transaction_id }}&response=more_info&prospect_id={{ prospect_id }}"
+                        width="100%">
+                        Hablar con un asesor
+                    </mj-button>
+
+                    <mj-text align="center" padding-top="15px">
+                        <a href="{{ domain }}?transaction_id={{ transaction_id }}&response=not_interested&prospect_id={{ prospect_id }}"
+                            style="color: rgba(11, 31, 42, 0.62); text-decoration: underline; font-size: 12px; font-weight: bold;">
+                            Ya no estoy interesado
+                        </a>
+                    </mj-text>
+                </mj-column>
+            </mj-section>
+
+            <mj-section border-top="1px solid #eceff1" padding-top="20px" padding-bottom="0">
+                <mj-column>
+                    <mj-text font-size="12px" color="rgba(11, 31, 42, 0.68)">
+                        Si tienes alguna duda, responde a este correo.<br>
+                        Gracias por confiar en nosotros.
+                    </mj-text>
+                </mj-column>
+            </mj-section>
+
+        </mj-wrapper>
+
+        <mj-section padding="20px"></mj-section>
+
+    </mj-body>
+</mjml>
