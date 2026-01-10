@@ -18,22 +18,37 @@ The root CDK stack (`lib/crm-infra-stack.ts`) orchestrates three main constructs
         *   **Memory**: 1024 MB
         *   **Timeout**: 5 minutes
         *   **Trigger**: S3 `OBJECT_CREATED` event.
+        *   **Permissions**: Read/Write to Transactions table, Read from S3 bucket, SES SendEmail/SendRawEmail for `hidrorey.info`.
 
 ### B. API Response Construct (`ApiResponse`)
 *   **Source**: `lib/constructs/crm-api-response-construct.ts`
 *   **Resources**:
     *   **DynamoDB Table** (`crm-api-responses`):
-        *   **Partition Key**: `response_id` (String)
+        *   **Partition Key**: `email_transaction_id` (String)
     *   **Lambda Function** (`Handler`):
         *   **Runtime**: Python 3.11 (source: `lambda/crm-web-response`)
         *   **Timeout**: 10 seconds
-    *   **API Gateway**: REST API acting as a proxy to the Lambda function.
+        *   **Permissions**: Read/Write to Responses and Transactions tables, SES SendEmail/SendRawEmail.
+    *   **API Gateway**: REST API acting as a proxy to the Lambda function. Configured with CORS enabled and request throttling (50/60).
 
 ### C. Website Construct (`Website`)
 *   **Source**: `lib/constructs/crm-web-construct.ts`
 *   **Resources**:
-    *   **S3 Bucket**: Hosts static `index.html`.
+    *   **S3 Bucket**: Hosts static `index.html` and assets.
     *   **CloudFront Distribution**: Serves the bucket content via HTTPS. Configured with a custom 404 error response pointing to `index.html`.
+    *   **Route 53**: A-Record alias pointing to the CloudFront distribution for the custom domain (`hidrorey.info`).
+    *   **ACM**: SSL Certificate used for secure HTTPS communication.
+
+### D. Email Forwarding (`EmailForwardingRuleSet`)
+*   **Source**: `lib/crm-infra-stack.ts` (via `@seeebiii/ses-email-forwarding`)
+*   **Resources**:
+    *   **SES Receipt Rule Set**: Captures incoming emails to `contacto@hidrorey.info` and forwards them to a designated target email (`contacto@hidrorey.mx`).
+
+### E. Opt-Outs Management
+*   **DynamoDB Table** (`crm-email-opt-outs`):
+    *   **Partition Key**: `quote_id` (String)
+    *   **Purpose**: Stores IDs of quotes or customers who have opted out of further communications.
+    *   **Permissions**: Both `Processor` and `Handler` Lambdas have Read/Write access.
 
 ---
 
@@ -49,8 +64,9 @@ The root CDK stack (`lib/crm-infra-stack.ts`) orchestrates three main constructs
         *   **Logic**: Joins headers with items and customer data (Client or Prospect). Enriches product data using bundled `assets/products.csv`.
     *   `filter.py`: Applies business logic.
         *   **Cadence**: Checks if `(Today - QuoteDate)` matches configured days `{16}`.
+        *   **Opt-Out Check**: Verifies if the `quote_id` exists in `crm-email-opt-outs` before sending.
         *   **Allowlist**: Checks `assets/allowlist.yaml`. If `prospect_ids` is empty/missing, ALL prospects are allowed. Customers (`CLIENT`) always require an explicit match.
-    *   `sender.py`: Handles email generation and sending (logic assumed based on name/context).
+    *   `sender.py`: Handles email generation and sending via SES.
 
 ### B. Response Handler (`crm-web-response`)
 *   **Path**: `lambda/crm-web-response/`
@@ -60,14 +76,15 @@ The root CDK stack (`lib/crm-infra-stack.ts`) orchestrates three main constructs
     {
         "id": "prospect_id_string",
         "email_transaction_id": "uuid_string",
-        "response": "Buy" | "More Info" | "Not Interested"
+        "response": "Buy" | "More Info" | "Not Interested" | "Opt Out"
     }
     ```
 *   **Logic**:
     1.  Validates input `RequestParams`.
-    2.  Writes a new record to `crm-api-responses` with a UUID `response_id`.
+    2.  Writes a new record to `crm-api-responses` using `email_transaction_id`.
     3.  Fetches the original email context from `crm-quotes-emails-transactions` using `email_transaction_id`.
-    4.  Triggers `ResponseEmailSender` to notify the sales rep.
+    4.  If response is "Opt Out", it records the `quote_id` in `crm-email-opt-outs`.
+    5.  Triggers `ResponseEmailSender` to notify the sales rep via SES.
 
 ---
 
@@ -88,8 +105,13 @@ Used to track every email sent to a prospect.
 Used to track user feedback.
 *   **Table Name**: `crm-api-responses`
 *   **Schema**:
-    *   `response_id` (PK): UUID
+    *   `email_transaction_id` (PK): UUID (Reference to Transactions table)
     *   `received_at`: ISO timestamp.
-    *   `email_transaction_id`: Reference to the transaction table.
     *   `prospect_id`: ID of the prospect/client.
-    *   `response_type`: Enum ("Buy", "More Info", "Not Interested").
+    *   `response_type`: Enum ("Buy", "More Info", "Not Interested", "Opt Out").
+
+### DynamoDB: Opt-Outs
+Used to prevent sending emails to specific quotes.
+*   **Table Name**: `crm-email-opt-outs`
+*   **Schema**:
+    *   `quote_id` (PK): String
