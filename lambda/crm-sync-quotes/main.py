@@ -26,6 +26,7 @@ TEMPLATE_PATH = "assets/template.html"
 SALES_REPS_PATH = "assets/sales_rep.csv"
 PRODUCTS_PATH = "assets/products.csv"
 ALLOW_LIST_PATH = "assets/allowlist.yaml"
+CUSTOM_SEND_PATH = "assets/custom_sends.yaml"
 
 EMAIL_CADENCE_DAYS = set([7, 14, 21])
 EMAIL_SUBJECT_CONFIG: Dict[int, str] = {
@@ -64,7 +65,7 @@ def handler(event, context):
     transactions_table: Table = dynamodb.Table(safe_get_env(TABLE_NAME))
     opt_out_table: Table = dynamodb.Table(safe_get_env(OPT_OUT_TABLE_NAME))
     quote_filter = QuoteFilter(
-        quotes, EMAIL_CADENCE_DAYS, ALLOW_LIST_PATH, opt_out_table
+        quotes, EMAIL_CADENCE_DAYS, ALLOW_LIST_PATH, CUSTOM_SEND_PATH, opt_out_table
     )
     filtered_quotes = quote_filter.filter_quotes()
     logger.info(

@@ -16,6 +16,7 @@ class QuoteFilter:
         quotes: List[Quote],
         email_cadence_config: Set[int],
         allowlist_path: str,
+        custom_send_path: str,
         opt_out_table: Table,
     ) -> None:
         self.quotes = quotes
@@ -24,6 +25,22 @@ class QuoteFilter:
             allowlist_path
         )
         self.opt_out_table = opt_out_table
+        self.custom_send_ids = self._parse_custom_sends(custom_send_path)
+
+    def _parse_custom_sends(self, custom_send_path: str) -> Set[str]:
+        try:
+            with open(custom_send_path, "r", encoding="utf-8") as f:
+                data = yaml.safe_load(f) or {}
+                custom_send_raw = data.get("ids") or []
+                custom_send_ids = set(map(str, custom_send_raw))
+                logger.info(
+                    "Parsed custom sends: %d quote_ids",
+                    len(custom_send_ids),
+                )
+                return custom_send_ids
+        except Exception as e:
+            logger.error("Error reading custom sends file: %s", e, exc_info=True)
+            return set()
 
     def _parse_allowlist(self, allow_list_path: str) -> tuple[set[str], set[str]]:
         try:
@@ -79,6 +96,15 @@ class QuoteFilter:
         prospect_allow_all = len(self.prospect_allowlist) == 0
 
         for quote in self.quotes:
+            if quote.id in self.custom_send_ids:
+                filtered_quotes.append(quote)
+                logger.info(
+                    "Allowed custom send quote=%s customer_type=%s prospect_id=%s",
+                    quote.id,
+                    quote.customer_type.value,
+                    quote.prospect.id,
+                )
+                continue
             days_since_creation = (now - datetime.fromisoformat(quote.created_at)).days
             if days_since_creation not in self.email_cadence_config:
                 continue
@@ -97,8 +123,8 @@ class QuoteFilter:
             else:
                 continue
 
-            if self._is_opted_out(quote.id):
-                continue
+            # if self._is_opted_out(quote.id):
+            #     continue
 
             logger.info(
                 "Allowed quote=%s customer_type=%s prospect_id=%s (prospect_allow_all=%s)",
