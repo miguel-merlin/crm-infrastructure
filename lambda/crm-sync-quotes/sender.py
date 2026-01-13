@@ -10,6 +10,8 @@ import uuid
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
+DEFAULT_SUBJECT = "Detalles de tu cotización"
+
 
 def _format_money(value) -> str:
     try:
@@ -30,9 +32,6 @@ def _format_percent(value) -> str:
         return f"{v:.2f}%"
     except Exception:
         return "—"
-
-
-DEFAULT_SUBJECT = "Detalles de tu cotización"
 
 
 class QuoteEmailSender:
