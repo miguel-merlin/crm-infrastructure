@@ -59,7 +59,7 @@ class ResponseEmailSender:
         )
         return self.template.render(
             sales_rep_name=email_transaction.sales_rep.name,
-            quote_id=response_record.email_transaction_id,
+            quote_id=email_transaction.quote_id,
             response_key=response_key,
             response_label=response_label,
         )
