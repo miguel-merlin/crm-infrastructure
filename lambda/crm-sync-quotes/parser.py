@@ -16,6 +16,7 @@ import csv
 import os
 from dbfread import DBF
 from datetime import timedelta, datetime
+from extractor import EmailExtractor
 
 logger = logging.getLogger(__name__)
 
@@ -41,6 +42,7 @@ class QuoteParser:
         self.products_map: Dict[str, BaseProduct] = self._parse_products_from_csv(
             products_path
         )
+        self.email_extractor = EmailExtractor()
 
     def _load_sales_reps(self, sales_reps_path: str) -> Dict[str, SalesRep]:
         sales_reps: Dict[str, SalesRep] = {}
@@ -184,7 +186,7 @@ class QuoteParser:
         cve_pros = prospect_rec.get("CVE_PROS")
         nom_pros = prospect_rec.get("NOM_PROS", "").strip()
         email_pros = prospect_rec.get("EMAIL_PROS", "").strip()
-        email = extract_email(email_pros)
+        email = self.email_extractor.extract_first_or_empty(email_pros)
         if not email:
             return None
         return Prospect(id=str(cve_pros).strip(), name=nom_pros, email=email)
@@ -194,7 +196,7 @@ class QuoteParser:
         cve_cte = client_rec.get("CVE_CTE")
         nom_cte = client_rec.get("NOM_CTE", "").strip()
         email_cte = client_rec.get("EMAIL_CTE", "").strip()
-        email = extract_email(email_cte)
+        email = self.email_extractor.extract_first_or_empty(email_cte)
         if not email:
             return None
         return Prospect(id=str(cve_cte).strip(), name=nom_cte, email=email)
