@@ -37,6 +37,7 @@ class QuoteFilter:
                     "Parsed custom sends: %d quote_ids",
                     len(custom_send_ids),
                 )
+                print("Custom send IDs:", custom_send_ids)
                 return custom_send_ids
         except Exception as e:
             logger.error("Error reading custom sends file: %s", e, exc_info=True)
@@ -123,8 +124,8 @@ class QuoteFilter:
             else:
                 continue
 
-            # if self._is_opted_out(quote.id):
-            #     continue
+            if self._is_opted_out(quote.id):
+                continue
 
             logger.info(
                 "Allowed quote=%s customer_type=%s prospect_id=%s (prospect_allow_all=%s)",
