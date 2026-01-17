@@ -93,8 +93,9 @@ class QuoteFilter:
         filtered_quotes: List[Quote] = []
         now = datetime.now()
 
-        # If YAML had no prospect_ids (or file missing/invalid), allow all prospects.
+        # If YAML had no prospect_ids or customer_ids (or file missing/invalid), allow all prospects.
         prospect_allow_all = len(self.prospect_allowlist) == 0
+        client_allow_all = len(self.customer_allowlist) == 0
 
         for quote in self.quotes:
             if quote.id in self.custom_send_ids:
@@ -118,7 +119,10 @@ class QuoteFilter:
                     continue
 
             elif quote.customer_type == CustomerType.CLIENT:
-                if quote.prospect.id not in self.customer_allowlist:
+                if (
+                    not client_allow_all
+                    and quote.prospect.id not in self.customer_allowlist
+                ):
                     continue
 
             else:
@@ -128,11 +132,12 @@ class QuoteFilter:
                 continue
 
             logger.info(
-                "Allowed quote=%s customer_type=%s prospect_id=%s (prospect_allow_all=%s)",
+                "Allowed quote=%s customer_type=%s prospect_id=%s (prospect_allow_all=%s, client_allow_all=%s)",
                 quote.id,
                 quote.customer_type.value,
                 quote.prospect.id,
                 prospect_allow_all,
+                client_allow_all,
             )
             filtered_quotes.append(quote)
 
