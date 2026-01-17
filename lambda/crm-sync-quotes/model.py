@@ -112,30 +112,9 @@ class Quote:
 class EmailStatus(Enum):
     NO_RESPONSE = "No Response"
     SENT = "Sent"
-    SKIPPED = "Skipped"
 
     def __str__(self) -> str:
         return self.value
-
-
-class ExperimentGroup(Enum):
-    CONTROL = "control"
-    TREATMENT = "treatment"
-
-    def __str__(self) -> str:
-        return self.value
-
-
-@dataclass
-class ExperimentInfo:
-    experiment_group: ExperimentGroup
-    experiment_name: str = ""
-
-    def to_dynamodb_item(self) -> dict:
-        return {
-            "experiment_group": self.experiment_group.value,
-            "experiment_name": self.experiment_name,
-        }
 
 
 @dataclass
@@ -146,7 +125,6 @@ class EmailTransaction:
     sent_at: str
     status: EmailStatus
     sales_rep: SalesRep
-    experiment_info: ExperimentInfo | None = None
 
     def to_dynamodb_item(self) -> dict:
         return {
@@ -156,9 +134,4 @@ class EmailTransaction:
             "sent_at": self.sent_at,
             "status": self.status.value,
             "sales_rep": self.sales_rep.to_dynamodb_item(),
-            "experiment_info": (
-                self.experiment_info.to_dynamodb_item()
-                if self.experiment_info
-                else None
-            ),
         }
