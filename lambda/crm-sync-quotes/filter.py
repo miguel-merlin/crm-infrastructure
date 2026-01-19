@@ -1,4 +1,4 @@
-from model import Quote, CustomerType
+from model import Quote, CustomerType, QuoteStatus
 from typing import List, Set
 from datetime import datetime
 import yaml
@@ -98,6 +98,8 @@ class QuoteFilter:
         client_allow_all = len(self.customer_allowlist) == 0
 
         for quote in self.quotes:
+            if quote.status != QuoteStatus.SENT:
+                continue
             if quote.id in self.custom_send_ids:
                 filtered_quotes.append(quote)
                 logger.info(
