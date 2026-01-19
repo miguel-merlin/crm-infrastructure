@@ -132,10 +132,11 @@ class QuoteFilter:
                 continue
 
             logger.info(
-                "Allowed quote=%s customer_type=%s prospect_id=%s (prospect_allow_all=%s, client_allow_all=%s)",
+                "Allowed quote=%s customer_type=%s prospect_id=%s quote_status=%s (prospect_allow_all=%s, client_allow_all=%s)",
                 quote.id,
                 quote.customer_type.value,
                 quote.prospect.id,
+                quote.status.value,
                 prospect_allow_all,
                 client_allow_all,
             )
