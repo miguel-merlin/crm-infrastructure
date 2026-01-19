@@ -3,7 +3,7 @@
         <mj-title>Recordatorio de Cotización | Hidrorey</mj-title>
         <mj-attributes>
             <mj-all font-family="Arial, sans-serif" color="#0b1f2a" />
-            <mj-text font-size="14px" line-height="1.6" />
+            <mj-text font-size="14px" line-height="160%" />
             <mj-button border-radius="25px" font-weight="bold" font-size="14px" />
         </mj-attributes>
         <mj-style>
