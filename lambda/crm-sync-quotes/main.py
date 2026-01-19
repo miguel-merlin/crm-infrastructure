@@ -21,7 +21,7 @@ logger.setLevel(logging.INFO)
 TABLE_NAME = "TABLE_NAME"
 OPT_OUT_TABLE_NAME = "OPT_OUT_TABLE_NAME"
 SENDER = "SENDER_EMAIL"
-DOMANAIN = "DOMAIN"
+DOMAIN = "DOMAIN"
 ECOMMERCE_URL = "ECOMMERCE_URL"
 TEMPLATE_PATH = "assets/template.html"
 SALES_REPS_PATH = "assets/sales_rep.csv"
@@ -77,7 +77,7 @@ def handler(event, context):
         template_path=TEMPLATE_PATH,
         sender_email=safe_get_env(SENDER),
         transactions_table=transactions_table,
-        domain=safe_get_env(DOMANAIN),
+        domain=safe_get_env(DOMAIN),
         email_subject_config=EMAIL_SUBJECT_CONFIG,
         ecommerce_url=safe_get_env(ECOMMERCE_URL),
     )
