@@ -9,6 +9,7 @@ import { Construct } from "constructs";
 const DOMAIN = "hidrorey.info";
 const SUBDOMAIN = "www";
 const FWD_EMAIL = "contacto@hidrorey.mx";
+const ECOMMERCE_URL = "https://hidrolavadoras.com/";
 export class CrmInfraStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
@@ -40,6 +41,7 @@ export class CrmInfraStack extends cdk.Stack {
         SENDER_EMAIL: "contacto@" + DOMAIN,
         DOMAIN: "https://" + SUBDOMAIN + "." + DOMAIN,
         OPT_OUT_TABLE_NAME: optOutsTable.tableName,
+        ECOMMERCE_URL: ECOMMERCE_URL,
       },
       globalSecondaryIndexes: [
         {

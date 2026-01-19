@@ -43,6 +43,7 @@ class QuoteEmailSender:
         transactions_table: Table,
         domain: str,
         email_subject_config: Dict[int, str],
+        ecommerce_url: str,
     ) -> None:
         self.quotes = quotes
         self.ses_client = boto3.client("ses")
@@ -50,6 +51,7 @@ class QuoteEmailSender:
         self.transactions_table = transactions_table
         self.domain = domain
         self.email_subject_config = email_subject_config
+        self.ecommerce_url = ecommerce_url
         try:
             with open(template_path, "r", encoding="utf-8") as f:
                 template_content = f.read()
@@ -76,6 +78,7 @@ class QuoteEmailSender:
             total_vat=quote.compute_total_vat(),
             has_discount_1=has_discount_1,
             has_discount_2=has_discount_2,
+            ecommerce_url=self.ecommerce_url,
         )
 
     def _batch_write_transactions(self, transactions: List[EmailTransaction]) -> None:

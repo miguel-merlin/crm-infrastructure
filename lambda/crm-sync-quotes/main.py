@@ -22,6 +22,7 @@ TABLE_NAME = "TABLE_NAME"
 OPT_OUT_TABLE_NAME = "OPT_OUT_TABLE_NAME"
 SENDER = "SENDER_EMAIL"
 DOMANAIN = "DOMAIN"
+ECOMMERCE_URL = "ECOMMERCE_URL"
 TEMPLATE_PATH = "assets/template.html"
 SALES_REPS_PATH = "assets/sales_rep.csv"
 PRODUCTS_PATH = "assets/products.csv"
@@ -78,6 +79,7 @@ def handler(event, context):
         transactions_table=transactions_table,
         domain=safe_get_env(DOMANAIN),
         email_subject_config=EMAIL_SUBJECT_CONFIG,
+        ecommerce_url=safe_get_env(ECOMMERCE_URL),
     )
     email_sender.send_emails()
     return {"statusCode": 200, "body": "Processing completed successfully."}

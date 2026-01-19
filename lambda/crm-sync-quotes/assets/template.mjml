@@ -234,6 +234,17 @@
                 </mj-column>
             </mj-section>
 
+            <mj-section padding="20px 0 0 0">
+                <mj-column>
+                    <mj-text align="center" font-size="13px" color="rgba(11, 31, 42, 0.68)" padding="10px 0">
+                        ¿Buscas otros productos y ofertas? 
+                        <a href="{{ ecommerce_url }}" style="color: #003f6e; font-weight: bold; text-decoration: none;">
+                            Visita nuestra tienda en línea
+                        </a>
+                    </mj-text>
+                </mj-column>
+            </mj-section>
+
             <mj-section border-top="1px solid #eceff1" padding-top="20px" padding-bottom="0">
                 <mj-column>
                     <mj-text font-size="12px" color="rgba(11, 31, 42, 0.68)">
