@@ -236,10 +236,10 @@
 
             <mj-section padding="20px 0 0 0">
                 <mj-column>
-                    <mj-text align="center" font-size="13px" color="rgba(11, 31, 42, 0.68)" padding="10px 0">
-                        ¿Buscas otros productos y ofertas? 
+                    <mj-text align="center" font-size="15px" color="rgba(11, 31, 42, 0.68)" padding="10px 0">
+                        ¿Buscas otros productos y ofertas?  Visita
                         <a href="{{ ecommerce_url }}" style="color: #003f6e; font-weight: bold; text-decoration: none;">
-                            Visita nuestra tienda en línea
+                            {{ ecommerce_url }}
                         </a>
                     </mj-text>
                 </mj-column>
@@ -248,8 +248,7 @@
             <mj-section border-top="1px solid #eceff1" padding-top="20px" padding-bottom="0">
                 <mj-column>
                     <mj-text font-size="12px" color="rgba(11, 31, 42, 0.68)">
-                        Si tienes alguna duda, responde a este correo.<br>
-                        Gracias por confiar en nosotros.
+                        Si tienes alguna duda, responde a este correo.
                     </mj-text>
                 </mj-column>
             </mj-section>
