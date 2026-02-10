@@ -9,7 +9,8 @@
     "watch": "tsc -w",
     "test": "jest",
     "cdk": "cdk",
-    "build:emails": "mjml ./lambda/crm-sync-quotes/assets/template.mjml -o ./lambda/crm-sync-quotes/assets/template.html"
+    "build:emails": "mjml ./lambda/crm-sync-quotes/assets/*.mjml -o ./lambda/crm-sync-quotes/assets/",
+    "deploy": "cdk deploy --all --profile hidrorey"
   },
   "devDependencies": {
     "@seeebiii/ses-email-forwarding": "^5.0.2",

@@ -42,6 +42,13 @@ class SalesRep:
             "phone_number": self.phone_number,
         }
 
+    def is_empty(self) -> bool:
+        return not any([self.name, self.email, self.phone_number])
+
+    @staticmethod
+    def get_empty(sales_rep_id: str) -> "SalesRep":
+        return SalesRep(id=sales_rep_id, name="", email="", phone_number="")
+
 
 @dataclass
 class BaseProduct:
@@ -135,3 +142,11 @@ class EmailTransaction:
             "status": self.status.value,
             "sales_rep": self.sales_rep.to_dynamodb_item(),
         }
+
+
+@dataclass(frozen=True)
+class RescueEmailConfig:
+    rescue_emails: list[Quote]
+    subject: str
+    sales_rep_recipient: SalesRep
+    template_path: str

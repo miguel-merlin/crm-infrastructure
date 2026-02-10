@@ -2,7 +2,7 @@ import boto3
 from mypy_boto3_dynamodb.service_resource import Table
 from typing import List, Dict
 from datetime import datetime
-from model import Quote, EmailTransaction, EmailStatus
+from model import Quote, EmailTransaction, EmailStatus, RescueEmailConfig
 from jinja2 import Environment, select_autoescape
 import logging
 import uuid
@@ -44,6 +44,7 @@ class QuoteEmailSender:
         domain: str,
         email_subject_config: Dict[int, str],
         ecommerce_url: str,
+        rescue_email_config: RescueEmailConfig,
     ) -> None:
         self.quotes = quotes
         self.ses_client = boto3.client("ses")
@@ -52,13 +53,20 @@ class QuoteEmailSender:
         self.domain = domain
         self.email_subject_config = email_subject_config
         self.ecommerce_url = ecommerce_url
+        self.rescue_email_config = rescue_email_config
+        self.jinja_env = Environment(
+            autoescape=select_autoescape(["html", "xml"]),
+        )
+        self.jinja_env.filters["money"] = _format_money
+        self.jinja_env.filters["percent"] = _format_percent
         try:
             with open(template_path, "r", encoding="utf-8") as f:
                 template_content = f.read()
-            env = Environment(autoescape=select_autoescape(["html", "xml"]))
-            env.filters["money"] = _format_money
-            env.filters["percent"] = _format_percent
-            self.template = env.from_string(template_content)
+            self.template = self.jinja_env.from_string(template_content)
+
+            with open(rescue_email_config.template_path, "r", encoding="utf-8") as f:
+                rescue_template_content = f.read()
+            self.rescue_template = self.jinja_env.from_string(rescue_template_content)
         except Exception as e:
             raise ValueError(f"Error reading email template: {str(e)}") from e
 
@@ -79,6 +87,26 @@ class QuoteEmailSender:
             has_discount_1=has_discount_1,
             has_discount_2=has_discount_2,
             ecommerce_url=self.ecommerce_url,
+        )
+
+    def _render_rescue_template(self, quote: Quote) -> str:
+        """Render the rescue email template with quote data."""
+        has_discount_1, has_discount_2 = quote.has_discounts()
+
+        return self.rescue_template.render(
+            quote_id=quote.id,
+            prospect_name=quote.prospect.name,
+            sales_rep=quote.sales_rep,
+            sales_rep_name=quote.sales_rep.name,
+            amount=quote.amount,
+            status=str(quote.status),
+            created_at=quote.created_at,
+            domain=self.domain,
+            prospect_id=quote.prospect.id,
+            products=quote.products,
+            total_vat=quote.compute_total_vat(),
+            has_discount_1=has_discount_1,
+            has_discount_2=has_discount_2,
         )
 
     def _batch_write_transactions(self, transactions: List[EmailTransaction]) -> None:
@@ -132,6 +160,47 @@ class QuoteEmailSender:
             except Exception as e:
                 logger.error(
                     f"Error sending email to {quote.prospect.email} for quote {quote.id}: {str(e)}",
+                    exc_info=True,
+                )
+
+        for rescue_quote in self.rescue_email_config.rescue_emails:
+            if self.rescue_email_config.sales_rep_recipient.is_empty():
+                logger.warning(
+                    f"Skipping rescue email for quote {rescue_quote.id} because sales rep recipient is empty"
+                )
+                continue
+            try:
+                rendered_rescue_email = self._render_rescue_template(rescue_quote)
+                response = self.ses_client.send_email(
+                    Source=self.sender_email,
+                    Destination={
+                        "ToAddresses": [
+                            self.rescue_email_config.sales_rep_recipient.email
+                        ],
+                    },
+                    Message={
+                        "Subject": {
+                            "Data": self.rescue_email_config.subject,
+                            "Charset": "UTF-8",
+                        },
+                        "Body": {
+                            "Text": {
+                                "Data": f"Rescate para cotización {rescue_quote.id}",
+                                "Charset": "UTF-8",
+                            },
+                            "Html": {
+                                "Data": rendered_rescue_email,
+                                "Charset": "UTF-8",
+                            },
+                        },
+                    },
+                )
+                logger.info(
+                    f"Rescue email sent for quote {rescue_quote.id}, MessageId: {response['MessageId']}"
+                )
+            except Exception as e:
+                logger.error(
+                    f"Error sending rescue email for quote {rescue_quote.id}: {str(e)}",
                     exc_info=True,
                 )
         if email_transactions:

@@ -1,5 +1,5 @@
 from model import Quote, CustomerType, QuoteStatus
-from typing import List, Set
+from typing import List, Set, Tuple
 from datetime import datetime
 import yaml
 import logging
@@ -18,12 +18,14 @@ class QuoteFilter:
         allowlist_path: str,
         custom_send_path: str,
         opt_out_table: Table,
+        email_rescue_day: int,
     ) -> None:
         self.quotes = quotes
         self.email_cadence_config = email_cadence_config
         self.prospect_allowlist, self.customer_allowlist = self._parse_allowlist(
             allowlist_path
         )
+        self.email_rescue_day = email_rescue_day
         self.opt_out_table = opt_out_table
         self.custom_send_ids = self._parse_custom_sends(custom_send_path)
 
@@ -83,65 +85,53 @@ class QuoteFilter:
             )
             return False
 
-    def filter_quotes(self) -> List[Quote]:
-        """Filter quotes based on cadence + allowlist by customer type.
+    def _is_eligible_for_email(self, quote: Quote, days_since: int) -> bool:
+        """Encapsulates the filtering rules for readability."""
+        if quote.status != QuoteStatus.SENT or self._is_opted_out(quote.id):
+            return False
 
-        Rule change:
-        - If prospect allowlist is empty (missing/empty YAML), allow *all* prospects.
-        - Customers (CLIENT) still require allowlist match.
-        """
+        is_cadence_day = days_since in self.email_cadence_config
+        is_rescue_day = days_since == self.email_rescue_day
+        if not (is_cadence_day or is_rescue_day):
+            return False
+
+        allowlist = (
+            self.prospect_allowlist
+            if quote.customer_type == CustomerType.PROSPECT
+            else (
+                self.customer_allowlist
+                if quote.customer_type == CustomerType.CLIENT
+                else None
+            )
+        )
+        if allowlist is None:
+            return False
+
+        if len(allowlist) > 0 and quote.prospect.id not in allowlist:
+            return False
+
+        return True
+
+    def filter_quotes(self) -> Tuple[List[Quote], List[Quote]]:
         filtered_quotes: List[Quote] = []
+        rescue_quotes: List[Quote] = []
         now = datetime.now()
 
-        # If YAML had no prospect_ids or customer_ids (or file missing/invalid), allow all prospects.
-        prospect_allow_all = len(self.prospect_allowlist) == 0
-        client_allow_all = len(self.customer_allowlist) == 0
-
         for quote in self.quotes:
-            if quote.status != QuoteStatus.SENT:
-                continue
-            if quote.id in self.custom_send_ids:
+            if quote.id in self.custom_send_ids and quote.status == QuoteStatus.SENT:
                 filtered_quotes.append(quote)
+                continue
+
+            days_since = (now - datetime.fromisoformat(quote.created_at)).days
+            if not self._is_eligible_for_email(quote, days_since):
+                continue
+
+            if days_since == self.email_rescue_day:
+                rescue_quotes.append(quote)
                 logger.info(
-                    "Allowed custom send quote=%s customer_type=%s prospect_id=%s",
-                    quote.id,
-                    quote.customer_type.value,
-                    quote.prospect.id,
+                    "Quote %s added to rescue emails (day %d)", quote.id, days_since
                 )
-                continue
-            days_since_creation = (now - datetime.fromisoformat(quote.created_at)).days
-            if days_since_creation not in self.email_cadence_config:
-                continue
-
-            if quote.customer_type == CustomerType.PROSPECT:
-                if (
-                    not prospect_allow_all
-                    and quote.prospect.id not in self.prospect_allowlist
-                ):
-                    continue
-
-            elif quote.customer_type == CustomerType.CLIENT:
-                if (
-                    not client_allow_all
-                    and quote.prospect.id not in self.customer_allowlist
-                ):
-                    continue
-
             else:
-                continue
+                filtered_quotes.append(quote)
 
-            if self._is_opted_out(quote.id):
-                continue
-
-            logger.info(
-                "Allowed quote=%s customer_type=%s prospect_id=%s quote_status=%s (prospect_allow_all=%s, client_allow_all=%s)",
-                quote.id,
-                quote.customer_type.value,
-                quote.prospect.id,
-                quote.status.value,
-                prospect_allow_all,
-                client_allow_all,
-            )
-            filtered_quotes.append(quote)
-
-        return filtered_quotes
+        return filtered_quotes, rescue_quotes

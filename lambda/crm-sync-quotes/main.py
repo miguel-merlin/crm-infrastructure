@@ -5,7 +5,7 @@ from mypy_boto3_dynamodb.service_resource import Table
 import logging
 from typing import List, Dict
 from filter import QuoteFilter
-from model import Quote
+from model import Quote, RescueEmailConfig, SalesRep
 from parser import QuoteParser
 from sender import QuoteEmailSender
 from utils import (
@@ -35,6 +35,10 @@ EMAIL_SUBJECT_CONFIG: Dict[int, str] = {
     14: "Han pasado dos semanas, qué has pensado de tu cotización?",
     21: "Qué podemos hacer para que te decidas?",
 }
+EMAIL_RESCUE_DAY = 28
+EMAIL_RESCUE_SUBJECT = "4to recordatorio - Rescate"
+MANAGER_SALES_REP_ID = "1"
+RESCUE_EMAIL_TEMPLATE_PATH = "assets/template_rescue.html"
 
 
 def handler(event, context):
@@ -66,11 +70,23 @@ def handler(event, context):
     transactions_table: Table = dynamodb.Table(safe_get_env(TABLE_NAME))
     opt_out_table: Table = dynamodb.Table(safe_get_env(OPT_OUT_TABLE_NAME))
     quote_filter = QuoteFilter(
-        quotes, EMAIL_CADENCE_DAYS, ALLOW_LIST_PATH, CUSTOM_SEND_PATH, opt_out_table
+        quotes,
+        EMAIL_CADENCE_DAYS,
+        ALLOW_LIST_PATH,
+        CUSTOM_SEND_PATH,
+        opt_out_table,
+        EMAIL_RESCUE_DAY,
     )
-    filtered_quotes = quote_filter.filter_quotes()
+    filtered_quotes, rescue_quotes = quote_filter.filter_quotes()
     logger.info(
         f"Filtered down to {len(filtered_quotes)} quotes after applying cadence and allowlist"
+    )
+    email_rescue_config = RescueEmailConfig(
+        rescue_emails=rescue_quotes,
+        subject=EMAIL_RESCUE_SUBJECT,
+        sales_rep_recipient=parser.sales_reps.get(MANAGER_SALES_REP_ID)
+        or SalesRep.get_empty(MANAGER_SALES_REP_ID),
+        template_path=RESCUE_EMAIL_TEMPLATE_PATH,
     )
     email_sender = QuoteEmailSender(
         quotes=filtered_quotes,
@@ -80,6 +96,7 @@ def handler(event, context):
         domain=safe_get_env(DOMAIN),
         email_subject_config=EMAIL_SUBJECT_CONFIG,
         ecommerce_url=safe_get_env(ECOMMERCE_URL),
+        rescue_email_config=email_rescue_config,
     )
     email_sender.send_emails()
     return {"statusCode": 200, "body": "Processing completed successfully."}
