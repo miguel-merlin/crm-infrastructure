@@ -171,16 +171,18 @@ class QuoteEmailSender:
                 continue
             try:
                 rendered_rescue_email = self._render_rescue_template(rescue_quote)
+                unique_recipients = list(set([
+                    self.rescue_email_config.sales_rep_recipient.email,
+                    rescue_quote.sales_rep.email]))
+                subject = f"{self.rescue_email_config.subject} - {rescue_quote.id}"
                 response = self.ses_client.send_email(
                     Source=self.sender_email,
                     Destination={
-                        "ToAddresses": [
-                            self.rescue_email_config.sales_rep_recipient.email
-                        ],
+                        "ToAddresses": unique_recipients,
                     },
                     Message={
                         "Subject": {
-                            "Data": self.rescue_email_config.subject,
+                            "Data": subject,
                             "Charset": "UTF-8",
                         },
                         "Body": {

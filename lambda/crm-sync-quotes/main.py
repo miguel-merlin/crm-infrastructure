@@ -36,7 +36,7 @@ EMAIL_SUBJECT_CONFIG: Dict[int, str] = {
     21: "Qué podemos hacer para que te decidas?",
 }
 EMAIL_RESCUE_DAY = 28
-EMAIL_RESCUE_SUBJECT = "4to recordatorio - Rescate"
+EMAIL_RESCUE_SUBJECT = "Cotización vencida, Intervenir, Rescatar o dar de Baja"
 MANAGER_SALES_REP_ID = "1"
 RESCUE_EMAIL_TEMPLATE_PATH = "assets/template_rescue.html"
 
