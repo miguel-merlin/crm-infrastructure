@@ -45,6 +45,7 @@ class QuoteEmailSender:
         email_subject_config: Dict[int, str],
         ecommerce_url: str,
         rescue_email_config: RescueEmailConfig,
+        configuration_set_name: str,
     ) -> None:
         self.quotes = quotes
         self.ses_client = boto3.client("ses")
@@ -54,6 +55,7 @@ class QuoteEmailSender:
         self.email_subject_config = email_subject_config
         self.ecommerce_url = ecommerce_url
         self.rescue_email_config = rescue_email_config
+        self.configuration_set_name = configuration_set_name
         self.jinja_env = Environment(
             autoescape=select_autoescape(["html", "xml"]),
         )
@@ -144,6 +146,8 @@ class QuoteEmailSender:
                             "Html": {"Data": rendered_email, "Charset": "UTF-8"},
                         },
                     },
+                    ConfigurationSetName=self.configuration_set_name,
+                    Tags=[{"Name": "EmailType", "Value": "quote-followup"}],
                 )
                 logger.info(
                     f"Email sent to {quote.prospect.email} for quote {quote.id}, MessageId: {response['MessageId']}"
@@ -196,6 +200,8 @@ class QuoteEmailSender:
                             },
                         },
                     },
+                    ConfigurationSetName=self.configuration_set_name,
+                    Tags=[{"Name": "EmailType", "Value": "quote-rescue"}],
                 )
                 logger.info(
                     f"Rescue email sent for quote {rescue_quote.id}, MessageId: {response['MessageId']}"

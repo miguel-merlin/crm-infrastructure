@@ -25,9 +25,11 @@ class ResponseEmailSender:
         self,
         template_path: str,
         sender_email: str,
+        configuration_set_name: str,
     ) -> None:
         self.ses_client = boto3.client("ses")
         self.sender_email = sender_email
+        self.configuration_set_name = configuration_set_name
         try:
             with open(template_path, "r", encoding="utf-8") as f:
                 template_content = f.read()
@@ -86,6 +88,8 @@ class ResponseEmailSender:
                         "Html": {"Data": rendered_email, "Charset": "UTF-8"},
                     },
                 },
+                ConfigurationSetName=self.configuration_set_name,
+                Tags=[{"Name": "EmailType", "Value": "response-notification"}],
             )
             logger.info(
                 f"Email sent to {email_transaction.sales_rep.email} for quote {email_transaction.quote_id}, MessageId: {response['MessageId']}"

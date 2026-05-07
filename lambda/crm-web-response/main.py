@@ -180,6 +180,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         email_sender = ResponseEmailSender(
             template_path="assets/template.html",
             sender_email=safe_get_env("SENDER_EMAIL"),
+            configuration_set_name=safe_get_env("SES_CONFIGURATION_SET"),
         )
 
         t0 = _timed()

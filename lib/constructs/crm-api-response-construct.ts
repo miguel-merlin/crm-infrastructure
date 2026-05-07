@@ -4,7 +4,6 @@ import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
 import * as cdk from "aws-cdk-lib";
 import * as iam from "aws-cdk-lib/aws-iam";
 import { Construct } from "constructs";
-import * as path from "path";
 
 export interface ApiResponseProps {
   /**
@@ -54,7 +53,7 @@ export default class ApiResponse extends Construct {
       removalPolicy: cdk.RemovalPolicy.RETAIN, // Change to RETAIN for production
     });
 
-    const codePath = props.lambdaCodePath || path.join(__dirname, "../lambda");
+    const codePath = props.lambdaCodePath ?? "../lambda";
 
     this.handler = new lambda.Function(this, "Handler", {
       runtime: lambda.Runtime.PYTHON_3_11,
@@ -100,7 +99,7 @@ export default class ApiResponse extends Construct {
         actions: ["ses:SendEmail", "ses:SendRawEmail"],
         resources: [
           "arn:aws:ses:us-west-1:183631317390:identity/hidrorey.info",
-          "arn:aws:ses:us-west-1:183631317390:configuration-set/my-first-configuration-set",
+          "arn:aws:ses:us-west-1:183631317390:configuration-set/crm-emails",
         ],
       })
     );

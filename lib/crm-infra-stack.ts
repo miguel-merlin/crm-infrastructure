@@ -1,5 +1,6 @@
 import * as cdk from "aws-cdk-lib";
 import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
+import * as ses from "aws-cdk-lib/aws-ses";
 import CrmIngestion from "./constructs/crm-ingestion-construct";
 import ApiResponse from "./constructs/crm-api-response-construct";
 import Website from "./constructs/crm-web-construct";
@@ -10,9 +11,15 @@ const DOMAIN = "hidrorey.info";
 const SUBDOMAIN = "www";
 const FWD_EMAIL = "contacto@hidrorey.mx";
 const ECOMMERCE_URL = "https://hidrolavadoras.com/";
+const SES_CONFIGURATION_SET = "crm-emails";
 export class CrmInfraStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
+
+    const emailConfigSet = new ses.ConfigurationSet(this, "EmailConfigSet", {
+      configurationSetName: SES_CONFIGURATION_SET,
+      reputationMetrics: true,
+    });
 
     const emailTransactionsTable = new dynamodb.Table(this, "Table", {
       tableName: "crm-quotes-emails-transactions",
@@ -34,6 +41,38 @@ export class CrmInfraStack extends cdk.Stack {
       removalPolicy: cdk.RemovalPolicy.RETAIN,
     });
 
+    new ses.CfnConfigurationSetEventDestination(
+      this,
+      "SesCloudWatchEventDestination",
+      {
+        configurationSetName: emailConfigSet.configurationSetName,
+        eventDestination: {
+          name: "cloudwatch-metrics",
+          enabled: true,
+          matchingEventTypes: [
+            "send",
+            "reject",
+            "bounce",
+            "complaint",
+            "delivery",
+            "open",
+            "click",
+            "renderingFailure",
+            "deliveryDelay",
+          ],
+          cloudWatchDestination: {
+            dimensionConfigurations: [
+              {
+                dimensionName: "EmailType",
+                dimensionValueSource: "messageTag",
+                defaultDimensionValue: "default",
+              },
+            ],
+          },
+        },
+      }
+    );
+
     const crmIngestion = new CrmIngestion(this, "QuotesIngestion", {
       table: emailTransactionsTable,
       codePath: "./lambda/crm-sync-quotes",
@@ -42,6 +81,7 @@ export class CrmInfraStack extends cdk.Stack {
         DOMAIN: "https://" + SUBDOMAIN + "." + DOMAIN,
         OPT_OUT_TABLE_NAME: optOutsTable.tableName,
         ECOMMERCE_URL: ECOMMERCE_URL,
+        SES_CONFIGURATION_SET: SES_CONFIGURATION_SET,
       },
       globalSecondaryIndexes: [
         {
@@ -61,6 +101,7 @@ export class CrmInfraStack extends cdk.Stack {
         EMAIL_TRANSACTION_TABLE_NAME: crmIngestion.table.tableName,
         SENDER_EMAIL: "contacto@" + DOMAIN,
         OPT_OUT_TABLE_NAME: optOutsTable.tableName,
+        SES_CONFIGURATION_SET: SES_CONFIGURATION_SET,
       },
     });
     optOutsTable.grantReadWriteData(webApiTracking.handler);

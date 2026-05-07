@@ -23,6 +23,7 @@ OPT_OUT_TABLE_NAME = "OPT_OUT_TABLE_NAME"
 SENDER = "SENDER_EMAIL"
 DOMAIN = "DOMAIN"
 ECOMMERCE_URL = "ECOMMERCE_URL"
+SES_CONFIGURATION_SET = "SES_CONFIGURATION_SET"
 TEMPLATE_PATH = "assets/template.html"
 SALES_REPS_PATH = "assets/sales_rep.csv"
 PRODUCTS_PATH = "assets/products.csv"
@@ -97,6 +98,7 @@ def handler(event, context):
         email_subject_config=EMAIL_SUBJECT_CONFIG,
         ecommerce_url=safe_get_env(ECOMMERCE_URL),
         rescue_email_config=email_rescue_config,
+        configuration_set_name=safe_get_env(SES_CONFIGURATION_SET),
     )
     email_sender.send_emails()
     return {"statusCode": 200, "body": "Processing completed successfully."}

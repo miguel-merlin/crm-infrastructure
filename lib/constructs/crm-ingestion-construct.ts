@@ -87,7 +87,7 @@ export default class CrmIngestion extends Construct {
         actions: ["ses:SendEmail", "ses:SendRawEmail"],
         resources: [
           "arn:aws:ses:us-west-1:183631317390:identity/hidrorey.info",
-          "arn:aws:ses:us-west-1:183631317390:configuration-set/my-first-configuration-set",
+          "arn:aws:ses:us-west-1:183631317390:configuration-set/crm-emails",
         ],
       })
     );
