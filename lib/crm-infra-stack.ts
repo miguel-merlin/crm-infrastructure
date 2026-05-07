@@ -1,4 +1,5 @@
 import * as cdk from "aws-cdk-lib";
+import * as cloudwatch from "aws-cdk-lib/aws-cloudwatch";
 import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
 import * as ses from "aws-cdk-lib/aws-ses";
 import CrmIngestion from "./constructs/crm-ingestion-construct";
@@ -67,11 +68,18 @@ export class CrmInfraStack extends cdk.Stack {
                 dimensionValueSource: "messageTag",
                 defaultDimensionValue: "default",
               },
+              {
+                dimensionName: "SalesRepId",
+                dimensionValueSource: "messageTag",
+                defaultDimensionValue: "unknown",
+              },
             ],
           },
         },
       }
     );
+
+    this.buildEmailMetricsDashboard();
 
     const crmIngestion = new CrmIngestion(this, "QuotesIngestion", {
       table: emailTransactionsTable,
@@ -132,6 +140,107 @@ export class CrmInfraStack extends cdk.Stack {
           ],
         },
       ],
+    });
+  }
+
+  private buildEmailMetricsDashboard(): void {
+    const dashboard = new cloudwatch.Dashboard(this, "EmailMetricsDashboard", {
+      dashboardName: "crm-email-metrics",
+      defaultInterval: cdk.Duration.days(7),
+    });
+
+    const sesSearch = (
+      metricName: string,
+      label: string
+    ): cloudwatch.MathExpression =>
+      new cloudwatch.MathExpression({
+        expression: `SEARCH('{AWS/SES,EmailType,SalesRepId} MetricName="${metricName}"', 'Sum', 86400)`,
+        label,
+        period: cdk.Duration.days(1),
+        usingMetrics: {},
+      });
+
+    const totalsRow = ["Send", "Delivery", "Bounce", "Complaint", "Open", "Click"].map(
+      (metricName) =>
+        new cloudwatch.SingleValueWidget({
+          title: `${metricName} (7d)`,
+          metrics: [
+            new cloudwatch.MathExpression({
+              expression: `SUM(SEARCH('{AWS/SES,EmailType,SalesRepId} MetricName="${metricName}"', 'Sum', 86400))`,
+              label: metricName,
+              period: cdk.Duration.days(7),
+              usingMetrics: {},
+            }),
+          ],
+          width: 4,
+          height: 4,
+        })
+    );
+
+    const perRepSends = new cloudwatch.GraphWidget({
+      title: "Sends per sales rep (30d)",
+      left: [sesSearch("Send", "Send")],
+      width: 12,
+      height: 6,
+    });
+
+    const perRepOpens = new cloudwatch.GraphWidget({
+      title: "Opens per sales rep (30d)",
+      left: [sesSearch("Open", "Open")],
+      width: 12,
+      height: 6,
+    });
+
+    const perRepClicks = new cloudwatch.GraphWidget({
+      title: "Clicks per sales rep (30d)",
+      left: [sesSearch("Click", "Click")],
+      width: 12,
+      height: 6,
+    });
+
+    const bouncesByEmailType = new cloudwatch.GraphWidget({
+      title: "Bounces by email type (30d)",
+      left: [sesSearch("Bounce", "Bounce")],
+      width: 12,
+      height: 6,
+    });
+
+    const complaintsByEmailType = new cloudwatch.GraphWidget({
+      title: "Complaints by email type (30d)",
+      left: [sesSearch("Complaint", "Complaint")],
+      width: 12,
+      height: 6,
+    });
+
+    const reputation = new cloudwatch.GraphWidget({
+      title: "SES reputation",
+      left: [
+        new cloudwatch.Metric({
+          namespace: "AWS/SES",
+          metricName: "Reputation.BounceRate",
+          statistic: "Average",
+          period: cdk.Duration.hours(1),
+        }),
+        new cloudwatch.Metric({
+          namespace: "AWS/SES",
+          metricName: "Reputation.ComplaintRate",
+          statistic: "Average",
+          period: cdk.Duration.hours(1),
+        }),
+      ],
+      width: 24,
+      height: 6,
+    });
+
+    dashboard.addWidgets(...totalsRow);
+    dashboard.addWidgets(perRepSends, perRepOpens);
+    dashboard.addWidgets(perRepClicks, bouncesByEmailType);
+    dashboard.addWidgets(complaintsByEmailType);
+    dashboard.addWidgets(reputation);
+
+    new cdk.CfnOutput(this, "EmailMetricsDashboardUrl", {
+      value: `https://${this.region}.console.aws.amazon.com/cloudwatch/home?region=${this.region}#dashboards:name=${dashboard.dashboardName}`,
+      description: "CloudWatch dashboard with per-sales-rep SES email metrics",
     });
   }
 }

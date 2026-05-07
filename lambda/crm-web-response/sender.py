@@ -89,7 +89,10 @@ class ResponseEmailSender:
                     },
                 },
                 ConfigurationSetName=self.configuration_set_name,
-                Tags=[{"Name": "EmailType", "Value": "response-notification"}],
+                Tags=[
+                    {"Name": "EmailType", "Value": "response-notification"},
+                    {"Name": "SalesRepId", "Value": email_transaction.sales_rep.id or "unknown"},
+                ],
             )
             logger.info(
                 f"Email sent to {email_transaction.sales_rep.email} for quote {email_transaction.quote_id}, MessageId: {response['MessageId']}"

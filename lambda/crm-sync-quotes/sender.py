@@ -147,7 +147,10 @@ class QuoteEmailSender:
                         },
                     },
                     ConfigurationSetName=self.configuration_set_name,
-                    Tags=[{"Name": "EmailType", "Value": "quote-followup"}],
+                    Tags=[
+                        {"Name": "EmailType", "Value": "quote-followup"},
+                        {"Name": "SalesRepId", "Value": quote.sales_rep.id or "unknown"},
+                    ],
                 )
                 logger.info(
                     f"Email sent to {quote.prospect.email} for quote {quote.id}, MessageId: {response['MessageId']}"
@@ -201,7 +204,10 @@ class QuoteEmailSender:
                         },
                     },
                     ConfigurationSetName=self.configuration_set_name,
-                    Tags=[{"Name": "EmailType", "Value": "quote-rescue"}],
+                    Tags=[
+                        {"Name": "EmailType", "Value": "quote-rescue"},
+                        {"Name": "SalesRepId", "Value": rescue_quote.sales_rep.id or "unknown"},
+                    ],
                 )
                 logger.info(
                     f"Rescue email sent for quote {rescue_quote.id}, MessageId: {response['MessageId']}"
