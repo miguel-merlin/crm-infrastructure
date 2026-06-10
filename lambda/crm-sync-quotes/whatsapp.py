@@ -21,6 +21,11 @@ class WhatsAppClient:
         phone_number_id: str,
         timeout_seconds: int = 10,
     ) -> None:
+        if not phone_number_id or not phone_number_id.isdigit():
+            raise ValueError(
+                f"phone_number_id must be a non-empty digit string, "
+                f"got: {phone_number_id!r}"
+            )
         self.access_token = access_token
         self.phone_number_id = phone_number_id
         self.timeout_seconds = timeout_seconds
@@ -95,7 +100,7 @@ class WhatsAppClient:
                 f"Meta error code {err.get('code')}: {err.get('message')}"
             )
 
-        if "messages" in parsed:
+        if parsed.get("messages"):
             msg_id = parsed["messages"][0].get("id")
             logger.info("WhatsApp message sent to %s, id=%s", to, msg_id)
 

@@ -107,5 +107,27 @@ class TestWhatsAppClient(unittest.TestCase):
             )
 
 
+    @patch("whatsapp.urllib.request.urlopen")
+    def test_empty_messages_list_does_not_raise(self, mock_urlopen):
+        # Meta can return {"messages": []} for unsupported phones; must not
+        # raise IndexError - the caller's fallback contract depends on this.
+        mock_urlopen.return_value = _fake_response(200, {"messages": []})
+        result = self.client.send_template(
+            to="+528112345678",
+            template_name="x",
+            language_code="es_MX",
+            params=[],
+        )
+        self.assertEqual(result, {"messages": []})
+
+    def test_init_rejects_non_digit_phone_number_id(self):
+        with self.assertRaises(ValueError):
+            WhatsAppClient(access_token="t", phone_number_id="abc")
+
+    def test_init_rejects_empty_phone_number_id(self):
+        with self.assertRaises(ValueError):
+            WhatsAppClient(access_token="t", phone_number_id="")
+
+
 if __name__ == "__main__":
     unittest.main()
