@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from enum import Enum
-from typing import Tuple
+from typing import Tuple, Optional
 
 
 class QuoteStatus(Enum):
@@ -25,6 +25,7 @@ class Prospect:
     id: str
     name: str
     email: str
+    phone: Optional[str] = None
 
 
 @dataclass
