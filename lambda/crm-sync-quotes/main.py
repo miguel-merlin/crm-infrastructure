@@ -7,7 +7,7 @@ from typing import List, Dict
 from filter import QuoteFilter
 from model import Quote, RescueEmailConfig, SalesRep
 from parser import QuoteParser
-from sender import QuoteEmailSender
+from sender import QuoteReminderSender
 from utils import (
     safe_get_env,
     parse_s3_event,
@@ -89,7 +89,7 @@ def handler(event, context):
         or SalesRep.get_empty(MANAGER_SALES_REP_ID),
         template_path=RESCUE_EMAIL_TEMPLATE_PATH,
     )
-    email_sender = QuoteEmailSender(
+    reminder_sender = QuoteReminderSender(
         quotes=filtered_quotes,
         template_path=TEMPLATE_PATH,
         sender_email=safe_get_env(SENDER),
@@ -100,5 +100,5 @@ def handler(event, context):
         rescue_email_config=email_rescue_config,
         configuration_set_name=safe_get_env(SES_CONFIGURATION_SET),
     )
-    email_sender.send_emails()
+    reminder_sender.send_messages()
     return {"statusCode": 200, "body": "Processing completed successfully."}

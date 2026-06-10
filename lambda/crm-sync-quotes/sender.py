@@ -40,7 +40,7 @@ def _format_percent(value) -> str:
         return "—"
 
 
-class QuoteEmailSender:
+class QuoteReminderSender:
     def __init__(
         self,
         quotes: List[Quote],
@@ -123,7 +123,7 @@ class QuoteEmailSender:
             for transaction in transactions:
                 batch.put_item(Item=transaction.to_dynamodb_item())
 
-    def send_emails(self) -> None:
+    def send_messages(self) -> None:
         """Send emails for the filtered quotes."""
         email_transactions: List[MessageTransaction] = []
         for quote in self.quotes:
