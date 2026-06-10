@@ -11,6 +11,14 @@ class TestNormalizeToE164(unittest.TestCase):
             "+528112345678",
         )
 
+    def test_movil_ten_digits_with_populated_ladam(self):
+        # Regression: 10-digit MOVIL with a non-empty LADAM should NOT be
+        # concatenated. The number is already complete; LADAM is ignored.
+        self.assertEqual(
+            normalize_to_e164("8112345678", "811", "", "", "", ""),
+            "+528112345678",
+        )
+
     def test_movil_with_short_movil_and_ladam(self):
         # 7-digit MOVIL + 3-digit LADAM => 10-digit national => +52 prefix
         self.assertEqual(
@@ -21,6 +29,13 @@ class TestNormalizeToE164(unittest.TestCase):
     def test_movil_already_country_prefixed(self):
         self.assertEqual(
             normalize_to_e164("528112345678", "", "", "", "", ""),
+            "+528112345678",
+        )
+
+    def test_area_code_plus_number_already_qualified(self):
+        # area_code='52811' + number='2345678' => combined='528112345678' => +528112345678
+        self.assertEqual(
+            normalize_to_e164("2345678", "52811", "", "", "", ""),
             "+528112345678",
         )
 

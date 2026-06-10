@@ -26,6 +26,10 @@ def _try_candidate(
     ):
         return f"+{digits}"
 
+    # Already a complete 10-digit national number — area code not needed.
+    if len(digits) == 10:
+        return f"+{default_country_code}{digits}"
+
     # Concatenate area code + number, strip leading zeros
     combined = (_digits_only(area_code) + digits).lstrip("0")
 
