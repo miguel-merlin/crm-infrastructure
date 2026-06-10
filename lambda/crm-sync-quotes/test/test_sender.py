@@ -34,7 +34,7 @@ class TestReminderRouting(unittest.TestCase):
     def setUp(self):
         # Patch open() before constructor reads template files.
         self.patcher = patch(
-            "builtins.open",
+            "sender.open",
             MagicMock(
                 return_value=MagicMock(
                     __enter__=MagicMock(
@@ -43,6 +43,7 @@ class TestReminderRouting(unittest.TestCase):
                     __exit__=MagicMock(return_value=False),
                 )
             ),
+            create=True,
         )
         self.patcher.start()
         self.addCleanup(self.patcher.stop)

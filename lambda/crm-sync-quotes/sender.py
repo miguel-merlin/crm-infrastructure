@@ -56,11 +56,7 @@ class QuoteReminderSender:
         whatsapp_language_code: str = "es_MX",
     ) -> None:
         self.quotes = quotes
-        # ses_client is created lazily on first access via __getattr__ so
-        # that constructing the sender does not require boto3's service
-        # model files to be readable (important for tests that patch
-        # builtins.open). Tests can still override by assigning directly:
-        #   sender.ses_client = MagicMock()
+        self.ses_client = boto3.client("ses")
         self.sender_email = sender_email
         self.transactions_table = transactions_table
         self.domain = domain
@@ -86,16 +82,6 @@ class QuoteReminderSender:
             self.rescue_template = self.jinja_env.from_string(rescue_template_content)
         except Exception as e:
             raise ValueError(f"Error reading email template: {str(e)}") from e
-
-    def __getattr__(self, name: str):
-        # Lazily create the SES client on first access. Only invoked when
-        # normal attribute lookup fails (i.e. no instance/class attribute
-        # named ``ses_client`` exists yet).
-        if name == "ses_client":
-            client = boto3.client("ses")
-            self.__dict__["ses_client"] = client
-            return client
-        raise AttributeError(name)
 
     def _render_template(self, quote: Quote, transaction_id: str) -> str:
         has_discount_1, has_discount_2 = quote.has_discounts()
