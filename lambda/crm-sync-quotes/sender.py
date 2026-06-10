@@ -2,7 +2,13 @@ import boto3
 from mypy_boto3_dynamodb.service_resource import Table
 from typing import List, Dict
 from datetime import datetime
-from model import Quote, EmailTransaction, EmailStatus, RescueEmailConfig
+from model import (
+    Quote,
+    MessageTransaction,
+    MessageChannel,
+    EmailStatus,
+    RescueEmailConfig,
+)
 from jinja2 import Environment, select_autoescape
 import logging
 import uuid
@@ -111,7 +117,7 @@ class QuoteEmailSender:
             has_discount_2=has_discount_2,
         )
 
-    def _batch_write_transactions(self, transactions: List[EmailTransaction]) -> None:
+    def _batch_write_transactions(self, transactions: List[MessageTransaction]) -> None:
         """Batch write email transactions to DynamoDB."""
         with self.transactions_table.batch_writer() as batch:
             for transaction in transactions:
@@ -119,7 +125,7 @@ class QuoteEmailSender:
 
     def send_emails(self) -> None:
         """Send emails for the filtered quotes."""
-        email_transactions: List[EmailTransaction] = []
+        email_transactions: List[MessageTransaction] = []
         for quote in self.quotes:
             transaction_id = str(uuid.uuid4())
             rendered_email = self._render_template(quote, transaction_id)
@@ -155,10 +161,12 @@ class QuoteEmailSender:
                 logger.info(
                     f"Email sent to {quote.prospect.email} for quote {quote.id}, MessageId: {response['MessageId']}"
                 )
-                email_transaction = EmailTransaction(
+                email_transaction = MessageTransaction(
                     id=transaction_id,
                     quote_id=quote.id,
+                    channel=MessageChannel.EMAIL,
                     email_address=quote.prospect.email,
+                    phone=quote.prospect.phone,
                     sent_at=datetime.now().isoformat(),
                     status=EmailStatus.SENT,
                     sales_rep=quote.sales_rep,

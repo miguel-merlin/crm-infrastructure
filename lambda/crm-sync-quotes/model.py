@@ -125,24 +125,41 @@ class EmailStatus(Enum):
         return self.value
 
 
+class MessageChannel(Enum):
+    EMAIL = "email"
+    WHATSAPP = "whatsapp"
+
+    def __str__(self) -> str:
+        return self.value
+
+
 @dataclass
-class EmailTransaction:
+class MessageTransaction:
     id: str
     quote_id: str
+    channel: MessageChannel
     email_address: str
+    phone: Optional[str]
     sent_at: str
     status: EmailStatus
     sales_rep: SalesRep
+    fallback_from: Optional[MessageChannel] = None
 
     def to_dynamodb_item(self) -> dict:
-        return {
+        item: dict = {
             "transaction_id": self.id,
             "quote_id": self.quote_id,
+            "channel": self.channel.value,
             "email_address": self.email_address,
             "sent_at": self.sent_at,
             "status": self.status.value,
             "sales_rep": self.sales_rep.to_dynamodb_item(),
         }
+        if self.phone is not None:
+            item["phone"] = self.phone
+        if self.fallback_from is not None:
+            item["fallback_from"] = self.fallback_from.value
+        return item
 
 
 @dataclass(frozen=True)
