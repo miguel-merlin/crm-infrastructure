@@ -154,6 +154,34 @@ class TestReminderRouting(unittest.TestCase):
         self.wa_client.send_template.assert_not_called()
         sender.ses_client.send_email.assert_called_once()
 
+    def test_mixed_batch_per_quote_failure_does_not_poison_batch(self):
+        # Two quotes: first WhatsApp succeeds, second WhatsApp fails and
+        # falls back to email. Both transactions must be recorded.
+        q1 = _make_quote(phone="+528111111111", quote_id="Q-1")
+        q2 = _make_quote(phone="+528122222222", quote_id="Q-2")
+        sender = self._build_sender([q1, q2])
+
+        # First call succeeds; second call raises.
+        self.wa_client.send_template.side_effect = [
+            {"messages": [{"id": "wamid.1"}]},
+            WhatsAppSendError("Meta down"),
+        ]
+
+        sender.send_messages()
+
+        # WA attempted twice; email sent once (for q2 fallback).
+        self.assertEqual(self.wa_client.send_template.call_count, 2)
+        self.assertEqual(sender.ses_client.send_email.call_count, 1)
+
+        # Both transactions land in the batch writer.
+        items = [c.kwargs["Item"] for c in self.batch_ctx.put_item.call_args_list]
+        self.assertEqual(len(items), 2)
+        quote_ids = {item["quote_id"]: item["channel"] for item in items}
+        self.assertEqual(quote_ids["Q-1"], "whatsapp")
+        self.assertEqual(quote_ids["Q-2"], "email")
+        q2_item = next(i for i in items if i["quote_id"] == "Q-2")
+        self.assertEqual(q2_item["fallback_from"], "whatsapp")
+
 
 if __name__ == "__main__":
     unittest.main()

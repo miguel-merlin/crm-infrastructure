@@ -217,6 +217,12 @@ class QuoteReminderSender:
                     quote.id,
                     e,
                 )
+            except Exception as e:
+                logger.exception(
+                    "Unexpected error in WhatsApp send for quote %s, "
+                    "falling back to email",
+                    quote.id,
+                )
 
         try:
             self._send_email(
@@ -315,7 +321,15 @@ class QuoteReminderSender:
                 )
 
         if transactions:
-            self._batch_write_transactions(transactions)
-            logger.info(
-                "Wrote %d message transactions to DynamoDB", len(transactions)
-            )
+            try:
+                self._batch_write_transactions(transactions)
+                logger.info(
+                    "Wrote %d message transactions to DynamoDB",
+                    len(transactions),
+                )
+            except Exception:
+                logger.exception(
+                    "Failed to write %d message transactions to DynamoDB. "
+                    "Sends already succeeded; manual reconciliation may be needed.",
+                    len(transactions),
+                )
