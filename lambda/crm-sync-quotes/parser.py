@@ -17,6 +17,7 @@ import os
 from dbfread import DBF
 from datetime import timedelta, datetime
 from extractor import EmailExtractor
+from phone import normalize_to_e164
 
 logger = logging.getLogger(__name__)
 
@@ -189,7 +190,17 @@ class QuoteParser:
         email = self.email_extractor.extract_first_or_empty(email_pros)
         if not email:
             return None
-        return Prospect(id=str(cve_pros).strip(), name=nom_pros, email=email)
+        phone = normalize_to_e164(
+            movil=str(prospect_rec.get("MOVIL_PROS") or "").strip(),
+            ladam=str(prospect_rec.get("LADAM_PROS") or "").strip(),
+            tel1=str(prospect_rec.get("TEL1_PROS") or "").strip(),
+            tel2=str(prospect_rec.get("TEL2_PROS") or "").strip(),
+            tel3=str(prospect_rec.get("TEL3_PROS") or "").strip(),
+            lada=str(prospect_rec.get("LADA_PROS") or "").strip(),
+        )
+        return Prospect(
+            id=str(cve_pros).strip(), name=nom_pros, email=email, phone=phone
+        )
 
     def _parse_prospect_from_cliente_dbf(self, client_rec: Dict) -> Optional[Prospect]:
         """Parse a client record into a Prospect object."""
@@ -199,7 +210,17 @@ class QuoteParser:
         email = self.email_extractor.extract_first_or_empty(email_cte)
         if not email:
             return None
-        return Prospect(id=str(cve_cte).strip(), name=nom_cte, email=email)
+        phone = normalize_to_e164(
+            movil=str(client_rec.get("MOVIL_CTE") or "").strip(),
+            ladam=str(client_rec.get("LADAM_CTE") or "").strip(),
+            tel1=str(client_rec.get("TEL1_CTE") or "").strip(),
+            tel2=str(client_rec.get("TEL2_CTE") or "").strip(),
+            tel3=str(client_rec.get("TEL3_CTE") or "").strip(),
+            lada=str(client_rec.get("LADA_CTE") or "").strip(),
+        )
+        return Prospect(
+            id=str(cve_cte).strip(), name=nom_cte, email=email, phone=phone
+        )
 
     def _map_status(self, status_str: str) -> QuoteStatus:
         """Map the status string from DBF to QuoteStatus enum value."""
