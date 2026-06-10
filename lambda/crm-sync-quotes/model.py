@@ -139,10 +139,10 @@ class MessageTransaction:
     quote_id: str
     channel: MessageChannel
     email_address: str
-    phone: Optional[str]
     sent_at: str
     status: EmailStatus
     sales_rep: SalesRep
+    phone: Optional[str] = None
     fallback_from: Optional[MessageChannel] = None
 
     def to_dynamodb_item(self) -> dict:
