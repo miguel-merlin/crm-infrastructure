@@ -90,6 +90,8 @@ export class CrmInfraStack extends cdk.Stack {
         OPT_OUT_TABLE_NAME: optOutsTable.tableName,
         ECOMMERCE_URL: ECOMMERCE_URL,
         SES_CONFIGURATION_SET: SES_CONFIGURATION_SET,
+        // Placeholder template names — replace with the actual Meta-approved
+        // template names from WhatsApp Business Manager before going live.
         WHATSAPP_TEMPLATE_DAY_7: "reminder_day_7",
         WHATSAPP_TEMPLATE_DAY_14: "reminder_day_14",
         WHATSAPP_TEMPLATE_DAY_21: "reminder_day_21",

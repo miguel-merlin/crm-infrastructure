@@ -14,7 +14,7 @@ from utils import (
     parse_s3_event,
     download_file_from_s3,
 )
-from whatsapp import WhatsAppClient
+from whatsapp import WhatsAppClient, StubWhatsAppClient
 
 
 logger = logging.getLogger()
@@ -51,10 +51,14 @@ RESCUE_EMAIL_TEMPLATE_PATH = "assets/template_rescue.html"
 _whatsapp_client_cache: dict = {}
 
 
-def _load_whatsapp_client() -> tuple[WhatsAppClient, str]:
+def _load_whatsapp_client() -> tuple:
     """
     Load the Meta WhatsApp credentials from Secrets Manager and return a
     (client, language_code) tuple. Cached on the module for warm invocations.
+
+    On any failure (missing/malformed secret, IAM denial, network error), log
+    the failure and return a StubWhatsAppClient so the cadence sender falls
+    back to email for every quote. The day-28 rescue email path is unaffected.
     """
     if "client" in _whatsapp_client_cache:
         return (
@@ -62,16 +66,24 @@ def _load_whatsapp_client() -> tuple[WhatsAppClient, str]:
             _whatsapp_client_cache["language_code"],
         )
 
-    secret_arn = safe_get_env(WHATSAPP_SECRET_ARN)
-    sm = boto3.client("secretsmanager")
-    response = sm.get_secret_value(SecretId=secret_arn)
-    secret = json.loads(response["SecretString"])
+    try:
+        secret_arn = safe_get_env(WHATSAPP_SECRET_ARN)
+        sm = boto3.client("secretsmanager")
+        response = sm.get_secret_value(SecretId=secret_arn)
+        secret = json.loads(response["SecretString"])
 
-    client = WhatsAppClient(
-        access_token=secret["access_token"],
-        phone_number_id=secret["phone_number_id"],
-    )
-    language_code = secret.get("language_code", "es_MX")
+        client = WhatsAppClient(
+            access_token=secret["access_token"],
+            phone_number_id=secret["phone_number_id"],
+        )
+        language_code = secret.get("language_code", "es_MX")
+    except Exception:
+        logger.exception(
+            "Failed to load WhatsApp credentials; falling back to email for "
+            "all cadence reminders. Rescue emails are unaffected."
+        )
+        client = StubWhatsAppClient()
+        language_code = "es_MX"
 
     _whatsapp_client_cache["client"] = client
     _whatsapp_client_cache["language_code"] = language_code

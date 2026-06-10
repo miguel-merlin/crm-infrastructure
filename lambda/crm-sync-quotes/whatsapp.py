@@ -105,3 +105,23 @@ class WhatsAppClient:
             logger.info("WhatsApp message sent to %s, id=%s", to, msg_id)
 
         return parsed
+
+
+class StubWhatsAppClient:
+    """
+    A no-op WhatsApp client whose send_template always raises
+    WhatsAppSendError. Used as a defensive fallback when Meta credentials
+    cannot be loaded — the cadence sender will then fall back to email
+    for every quote, preserving the email and rescue paths.
+    """
+
+    def send_template(
+        self,
+        to: str,
+        template_name: str,
+        language_code: str,
+        params: List[str],
+    ) -> dict:
+        raise WhatsAppSendError(
+            "WhatsApp client is unavailable (credentials failed to load)"
+        )

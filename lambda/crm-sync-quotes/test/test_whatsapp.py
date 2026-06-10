@@ -129,5 +129,19 @@ class TestWhatsAppClient(unittest.TestCase):
             WhatsAppClient(access_token="t", phone_number_id="")
 
 
+class TestStubWhatsAppClient(unittest.TestCase):
+    def test_send_template_always_raises(self):
+        from whatsapp import StubWhatsAppClient
+
+        stub = StubWhatsAppClient()
+        with self.assertRaises(WhatsAppSendError):
+            stub.send_template(
+                to="+528112345678",
+                template_name="any",
+                language_code="es_MX",
+                params=["a", "b"],
+            )
+
+
 if __name__ == "__main__":
     unittest.main()
