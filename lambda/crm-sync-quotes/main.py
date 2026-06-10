@@ -1,3 +1,4 @@
+import json
 import os
 import boto3
 from mypy_boto3_s3 import S3Client
@@ -13,6 +14,7 @@ from utils import (
     parse_s3_event,
     download_file_from_s3,
 )
+from whatsapp import WhatsAppClient
 
 
 logger = logging.getLogger()
@@ -24,6 +26,10 @@ SENDER = "SENDER_EMAIL"
 DOMAIN = "DOMAIN"
 ECOMMERCE_URL = "ECOMMERCE_URL"
 SES_CONFIGURATION_SET = "SES_CONFIGURATION_SET"
+WHATSAPP_SECRET_ARN = "WHATSAPP_SECRET_ARN"
+WHATSAPP_TEMPLATE_DAY_7 = "WHATSAPP_TEMPLATE_DAY_7"
+WHATSAPP_TEMPLATE_DAY_14 = "WHATSAPP_TEMPLATE_DAY_14"
+WHATSAPP_TEMPLATE_DAY_21 = "WHATSAPP_TEMPLATE_DAY_21"
 TEMPLATE_PATH = "assets/template.html"
 SALES_REPS_PATH = "assets/sales_rep.csv"
 PRODUCTS_PATH = "assets/products.csv"
@@ -40,6 +46,36 @@ EMAIL_RESCUE_DAY = 28
 EMAIL_RESCUE_SUBJECT = "Cotización vencida, Intervenir, Rescatar o dar de Baja"
 MANAGER_SALES_REP_ID = "1"
 RESCUE_EMAIL_TEMPLATE_PATH = "assets/template_rescue.html"
+
+
+_whatsapp_client_cache: dict = {}
+
+
+def _load_whatsapp_client() -> tuple[WhatsAppClient, str]:
+    """
+    Load the Meta WhatsApp credentials from Secrets Manager and return a
+    (client, language_code) tuple. Cached on the module for warm invocations.
+    """
+    if "client" in _whatsapp_client_cache:
+        return (
+            _whatsapp_client_cache["client"],
+            _whatsapp_client_cache["language_code"],
+        )
+
+    secret_arn = safe_get_env(WHATSAPP_SECRET_ARN)
+    sm = boto3.client("secretsmanager")
+    response = sm.get_secret_value(SecretId=secret_arn)
+    secret = json.loads(response["SecretString"])
+
+    client = WhatsAppClient(
+        access_token=secret["access_token"],
+        phone_number_id=secret["phone_number_id"],
+    )
+    language_code = secret.get("language_code", "es_MX")
+
+    _whatsapp_client_cache["client"] = client
+    _whatsapp_client_cache["language_code"] = language_code
+    return client, language_code
 
 
 def handler(event, context):
@@ -89,6 +125,12 @@ def handler(event, context):
         or SalesRep.get_empty(MANAGER_SALES_REP_ID),
         template_path=RESCUE_EMAIL_TEMPLATE_PATH,
     )
+    whatsapp_client, whatsapp_language_code = _load_whatsapp_client()
+    whatsapp_templates: Dict[int, str] = {
+        7: safe_get_env(WHATSAPP_TEMPLATE_DAY_7),
+        14: safe_get_env(WHATSAPP_TEMPLATE_DAY_14),
+        21: safe_get_env(WHATSAPP_TEMPLATE_DAY_21),
+    }
     reminder_sender = QuoteReminderSender(
         quotes=filtered_quotes,
         template_path=TEMPLATE_PATH,
@@ -99,6 +141,9 @@ def handler(event, context):
         ecommerce_url=safe_get_env(ECOMMERCE_URL),
         rescue_email_config=email_rescue_config,
         configuration_set_name=safe_get_env(SES_CONFIGURATION_SET),
+        whatsapp_client=whatsapp_client,
+        whatsapp_templates=whatsapp_templates,
+        whatsapp_language_code=whatsapp_language_code,
     )
     reminder_sender.send_messages()
     return {"statusCode": 200, "body": "Processing completed successfully."}
