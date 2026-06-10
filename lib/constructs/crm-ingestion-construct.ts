@@ -4,6 +4,7 @@ import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as s3n from "aws-cdk-lib/aws-s3-notifications";
 import * as iam from "aws-cdk-lib/aws-iam";
+import * as secretsmanager from "aws-cdk-lib/aws-secretsmanager";
 import { Construct } from "constructs";
 
 interface CrmIngestionProps {
@@ -29,6 +30,12 @@ export default class CrmIngestion extends Construct {
     this.bucket = new s3.Bucket(this, "Bucket", {
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       autoDeleteObjects: true,
+    });
+
+    const whatsappSecret = new secretsmanager.Secret(this, "WhatsAppSecret", {
+      secretName: "crm/whatsapp/meta",
+      description:
+        "Meta WhatsApp Cloud API credentials (access_token, phone_number_id, language_code). Populate manually in the AWS console.",
     });
 
     this.table = props.table;
@@ -69,12 +76,14 @@ export default class CrmIngestion extends Construct {
       description: "Processes CRM ingestion files from S3 to DynamoDB",
       environment: {
         TABLE_NAME: this.table.tableName,
+        WHATSAPP_SECRET_ARN: whatsappSecret.secretArn,
         ...props.lambdaEnvVars,
       },
     });
 
     this.table.grantReadWriteData(this.processor);
     this.bucket.grantRead(this.processor);
+    whatsappSecret.grantRead(this.processor);
 
     this.bucket.addEventNotification(
       s3.EventType.OBJECT_CREATED,
@@ -120,6 +129,12 @@ export default class CrmIngestion extends Construct {
     new cdk.CfnOutput(this, "IngestionProcessorArn", {
       value: this.processor.functionArn,
       description: "Lambda ARN for CRM ingestion processing",
+    });
+
+    new cdk.CfnOutput(this, "WhatsAppSecretArn", {
+      value: whatsappSecret.secretArn,
+      description:
+        "Secrets Manager ARN for Meta WhatsApp credentials (populate in console)",
     });
   }
 }
